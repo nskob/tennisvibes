@@ -1,5 +1,5 @@
 import { 
-  users, matches, training, tournaments, rankings, follows,
+  users, matches, training as trainingTable, tournaments, rankings, follows,
   type User, type InsertUser,
   type Match, type InsertMatch,
   type Training, type InsertTraining,
@@ -7,6 +7,8 @@ import {
   type Ranking, type InsertRanking,
   type Follow, type InsertFollow
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, or, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -447,4 +449,187 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  // Matches
+  async getMatch(id: number): Promise<Match | undefined> {
+    const [match] = await db.select().from(matches).where(eq(matches.id, id));
+    return match || undefined;
+  }
+
+  async getMatchesByUserId(userId: number): Promise<Match[]> {
+    return await db.select().from(matches).where(
+      or(eq(matches.player1Id, userId), eq(matches.player2Id, userId))
+    );
+  }
+
+  async createMatch(insertMatch: InsertMatch): Promise<Match> {
+    const [match] = await db
+      .insert(matches)
+      .values(insertMatch)
+      .returning();
+    
+    // Update user stats
+    const player1 = await this.getUser(insertMatch.player1Id);
+    const player2 = await this.getUser(insertMatch.player2Id);
+    
+    if (player1) {
+      await this.updateUser(player1.id, {
+        matchesPlayed: (player1.matchesPlayed || 0) + 1,
+        wins: insertMatch.winner === player1.id ? (player1.wins || 0) + 1 : player1.wins,
+        losses: insertMatch.winner !== player1.id ? (player1.losses || 0) + 1 : player1.losses,
+      });
+    }
+    
+    if (player2) {
+      await this.updateUser(player2.id, {
+        matchesPlayed: (player2.matchesPlayed || 0) + 1,
+        wins: insertMatch.winner === player2.id ? (player2.wins || 0) + 1 : player2.wins,
+        losses: insertMatch.winner !== player2.id ? (player2.losses || 0) + 1 : player2.losses,
+      });
+    }
+    
+    return match;
+  }
+
+  async updateMatch(id: number, updates: Partial<InsertMatch>): Promise<Match | undefined> {
+    const [match] = await db
+      .update(matches)
+      .set(updates)
+      .where(eq(matches.id, id))
+      .returning();
+    return match || undefined;
+  }
+
+  // Training
+  async getTraining(id: number): Promise<Training | undefined> {
+    const [trainingRecord] = await db.select().from(trainingTable).where(eq(trainingTable.id, id));
+    return trainingRecord || undefined;
+  }
+
+  async getTrainingByUserId(userId: number): Promise<Training[]> {
+    return await db.select().from(trainingTable).where(eq(trainingTable.userId, userId));
+  }
+
+  async createTraining(insertTraining: InsertTraining): Promise<Training> {
+    const [trainingRecord] = await db
+      .insert(trainingTable)
+      .values(insertTraining)
+      .returning();
+    return trainingRecord;
+  }
+
+  // Tournaments
+  async getTournament(id: number): Promise<Tournament | undefined> {
+    const [tournament] = await db.select().from(tournaments).where(eq(tournaments.id, id));
+    return tournament || undefined;
+  }
+
+  async getAllTournaments(): Promise<Tournament[]> {
+    return await db.select().from(tournaments);
+  }
+
+  async createTournament(insertTournament: InsertTournament): Promise<Tournament> {
+    const [tournament] = await db
+      .insert(tournaments)
+      .values(insertTournament)
+      .returning();
+    return tournament;
+  }
+
+  async updateTournament(id: number, updates: Partial<InsertTournament>): Promise<Tournament | undefined> {
+    const [tournament] = await db
+      .update(tournaments)
+      .set(updates)
+      .where(eq(tournaments.id, id))
+      .returning();
+    return tournament || undefined;
+  }
+
+  // Rankings
+  async getRankingByUserId(userId: number): Promise<Ranking | undefined> {
+    const [ranking] = await db.select().from(rankings).where(eq(rankings.userId, userId));
+    return ranking || undefined;
+  }
+
+  async getAllRankings(): Promise<Ranking[]> {
+    return await db.select().from(rankings).orderBy(desc(rankings.rating));
+  }
+
+  async updateRanking(userId: number, rating: number): Promise<Ranking> {
+    const existing = await this.getRankingByUserId(userId);
+    
+    if (existing) {
+      const [ranking] = await db
+        .update(rankings)
+        .set({ rating, updatedAt: new Date() })
+        .where(eq(rankings.userId, userId))
+        .returning();
+      return ranking;
+    } else {
+      const [ranking] = await db
+        .insert(rankings)
+        .values({ userId, rating })
+        .returning();
+      return ranking;
+    }
+  }
+
+  // Follows
+  async getFollowsByUserId(userId: number): Promise<Follow[]> {
+    return await db.select().from(follows).where(eq(follows.followerId, userId));
+  }
+
+  async getFollowersByUserId(userId: number): Promise<Follow[]> {
+    return await db.select().from(follows).where(eq(follows.followingId, userId));
+  }
+
+  async createFollow(insertFollow: InsertFollow): Promise<Follow> {
+    const [follow] = await db
+      .insert(follows)
+      .values(insertFollow)
+      .returning();
+    return follow;
+  }
+
+  async deleteFollow(followerId: number, followingId: number): Promise<boolean> {
+    const result = await db
+      .delete(follows)
+      .where(
+        eq(follows.followerId, followerId) && eq(follows.followingId, followingId)
+      );
+    return (result.rowCount || 0) > 0;
+  }
+}
+
+export const storage = new DatabaseStorage();
