@@ -270,11 +270,15 @@ export class MemStorage implements IStorage {
   async createMatch(insertMatch: InsertMatch): Promise<Match> {
     const id = this.currentMatchId++;
     const match: Match = {
-      ...insertMatch,
       id,
+      player1Id: insertMatch.player1Id,
+      player2Id: insertMatch.player2Id,
+      date: insertMatch.date,
+      sets: insertMatch.sets as Array<{p1: number, p2: number}>,
+      winner: insertMatch.winner || null,
+      type: insertMatch.type,
       tournamentId: insertMatch.tournamentId || null,
       notes: insertMatch.notes || null,
-      winner: insertMatch.winner || null,
       createdAt: new Date(),
     };
     this.matches.set(id, match);
@@ -310,7 +314,14 @@ export class MemStorage implements IStorage {
     const match = this.matches.get(id);
     if (!match) return undefined;
     
-    const updatedMatch = { ...match, ...updates };
+    const updatedMatch: Match = {
+      ...match,
+      ...updates,
+      sets: updates.sets ? updates.sets as Array<{p1: number, p2: number}> : match.sets,
+      tournamentId: updates.tournamentId !== undefined ? updates.tournamentId : match.tournamentId,
+      notes: updates.notes !== undefined ? updates.notes : match.notes,
+      winner: updates.winner !== undefined ? updates.winner : match.winner,
+    };
     this.matches.set(id, updatedMatch);
     return updatedMatch;
   }
