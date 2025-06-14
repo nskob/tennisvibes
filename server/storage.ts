@@ -8,7 +8,7 @@ import {
   type Follow, type InsertFollow
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, or, desc } from "drizzle-orm";
+import { eq, or, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -496,7 +496,7 @@ export class DatabaseStorage implements IStorage {
   async createMatch(insertMatch: InsertMatch): Promise<Match> {
     const [match] = await db
       .insert(matches)
-      .values(insertMatch)
+      .values(insertMatch as any)
       .returning();
     
     // Update user stats
@@ -523,9 +523,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateMatch(id: number, updates: Partial<InsertMatch>): Promise<Match | undefined> {
+    const updateFields: any = {};
+    
+    if (updates.player1Id !== undefined) updateFields.player1Id = updates.player1Id;
+    if (updates.player2Id !== undefined) updateFields.player2Id = updates.player2Id;
+    if (updates.date !== undefined) updateFields.date = updates.date;
+    if (updates.type !== undefined) updateFields.type = updates.type;
+    if (updates.sets !== undefined) updateFields.sets = updates.sets;
+    if (updates.winner !== undefined) updateFields.winner = updates.winner;
+    if (updates.tournamentId !== undefined) updateFields.tournamentId = updates.tournamentId;
+    if (updates.notes !== undefined) updateFields.notes = updates.notes;
+    
     const [match] = await db
       .update(matches)
-      .set(updates)
+      .set(updateFields)
       .where(eq(matches.id, id))
       .returning();
     return match || undefined;
@@ -626,7 +637,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(follows)
       .where(
-        eq(follows.followerId, followerId) && eq(follows.followingId, followingId)
+        and(eq(follows.followerId, followerId), eq(follows.followingId, followingId))
       );
     return (result.rowCount || 0) > 0;
   }
