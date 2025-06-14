@@ -13,7 +13,7 @@ export default function TabBar() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-app-secondary border-t border-app-border">
+    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md border-t" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
       <div className="flex items-center justify-around py-3">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
@@ -24,12 +24,12 @@ export default function TabBar() {
             return (
               <div key="tabs-section" className="flex items-center">
                 <Link href={tab.path}>
-                  <button className={`flex flex-col items-center p-2 ${isActive ? 'text-app-primary' : 'text-gray-400'}`}>
+                  <button className={`flex flex-col items-center p-2`} style={{ color: isActive ? 'var(--app-primary)' : 'hsl(0, 0%, 50%)' }}>
                     <Icon size={20} />
                   </button>
                 </Link>
                 <Link href="/match/new">
-                  <button className="flex flex-col items-center p-2 bg-app-primary text-black rounded-full w-12 h-12 justify-center mx-4">
+                  <button className="flex flex-col items-center p-2 rounded-full w-12 h-12 justify-center mx-4" style={{ backgroundColor: 'var(--app-primary)', color: 'var(--app-bg)' }}>
                     <Plus size={24} />
                   </button>
                 </Link>
@@ -39,7 +39,7 @@ export default function TabBar() {
           
           return (
             <Link key={tab.path} href={tab.path}>
-              <button className={`flex flex-col items-center p-2 ${isActive ? 'text-app-primary' : 'text-gray-400'}`}>
+              <button className={`flex flex-col items-center p-2`} style={{ color: isActive ? 'var(--app-primary)' : 'hsl(0, 0%, 50%)' }}>
                 <Icon size={20} />
               </button>
             </Link>
@@ -48,7 +48,7 @@ export default function TabBar() {
         
         {/* Profile tab */}
         <Link href="/profile">
-          <button className={`flex flex-col items-center p-2 ${location === "/profile" ? 'text-app-primary' : 'text-gray-400'}`}>
+          <button className={`flex flex-col items-center p-2`} style={{ color: location === "/profile" ? 'var(--app-primary)' : 'hsl(0, 0%, 50%)' }}>
             <User size={20} />
           </button>
         </Link>
