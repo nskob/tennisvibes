@@ -103,7 +103,11 @@ export class MemStorage implements IStorage {
         name: player.name,
         username: player.username,
         password: "password",
+        avatarUrl: null,
         skillLevel: player.skillLevel,
+        club: null,
+        playingStyle: null,
+        racket: null,
         wins: Math.floor(Math.random() * 50) + 20,
         losses: Math.floor(Math.random() * 30) + 10,
         matchesPlayed: Math.floor(Math.random() * 80) + 30,
@@ -136,6 +140,8 @@ export class MemStorage implements IStorage {
         sets: [{p1: 6, p2: 3}, {p1: 6, p2: 7}, {p1: 10, p2: 7}],
         winner: 1,
         type: "casual",
+        tournamentId: null,
+        notes: null,
       },
       {
         player1Id: 1,
@@ -144,6 +150,8 @@ export class MemStorage implements IStorage {
         sets: [{p1: 4, p2: 6}, {p1: 3, p2: 6}],
         winner: 3,
         type: "casual",
+        tournamentId: null,
+        notes: null,
       },
       {
         player1Id: 1,
@@ -152,6 +160,8 @@ export class MemStorage implements IStorage {
         sets: [{p1: 6, p2: 4}, {p1: 7, p2: 5}],
         winner: 1,
         type: "tournament",
+        tournamentId: null,
+        notes: null,
       },
     ];
 
@@ -183,6 +193,7 @@ export class MemStorage implements IStorage {
       },
       {
         userId: 1,
+        coach: null,
         type: "match",
         duration: 120,
         date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
@@ -213,6 +224,11 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
+      avatarUrl: insertUser.avatarUrl || null,
+      skillLevel: insertUser.skillLevel || null,
+      club: insertUser.club || null,
+      playingStyle: insertUser.playingStyle || null,
+      racket: insertUser.racket || null,
       wins: 0,
       losses: 0,
       matchesPlayed: 0,
@@ -256,6 +272,9 @@ export class MemStorage implements IStorage {
     const match: Match = {
       ...insertMatch,
       id,
+      tournamentId: insertMatch.tournamentId || null,
+      notes: insertMatch.notes || null,
+      winner: insertMatch.winner || null,
       createdAt: new Date(),
     };
     this.matches.set(id, match);
@@ -312,6 +331,8 @@ export class MemStorage implements IStorage {
     const training: Training = {
       ...insertTraining,
       id,
+      coach: insertTraining.coach || null,
+      notes: insertTraining.notes || null,
       createdAt: new Date(),
     };
     this.training.set(id, training);
@@ -332,6 +353,10 @@ export class MemStorage implements IStorage {
     const tournament: Tournament = {
       ...insertTournament,
       id,
+      participants: insertTournament.participants || null,
+      maxParticipants: insertTournament.maxParticipants || null,
+      startDate: insertTournament.startDate || null,
+      endDate: insertTournament.endDate || null,
       createdAt: new Date(),
     };
     this.tournaments.set(id, tournament);
