@@ -1,29 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRoute } from "wouter";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "wouter";
+import { useParams, useLocation } from "wouter";
+import AvatarUpload from "@/components/AvatarUpload";
+import { ArrowLeft } from "lucide-react";
 
 export default function PlayerProfile() {
-  const [, params] = useRoute("/player/:id");
-  const playerId = params?.id;
+  const params = useParams();
+  const [, setLocation] = useLocation();
+  const playerId = params.id;
 
   const { data: player, isLoading } = useQuery({
     queryKey: [`/api/users/${playerId}`],
-    enabled: !!playerId,
   });
 
-  const { data: matches, isLoading: matchesLoading } = useQuery({
+  const { data: matches } = useQuery({
     queryKey: [`/api/matches/user/${playerId}`],
-    enabled: !!playerId,
+  });
+
+  const { data: training } = useQuery({
+    queryKey: [`/api/training/user/${playerId}`],
   });
 
   if (isLoading) {
     return (
       <div className="p-6 pt-12">
-        <div className="animate-pulse">
-          <div className="w-24 h-24 bg-app-secondary rounded-full mx-auto mb-4"></div>
-          <div className="h-8 bg-app-secondary rounded mb-2"></div>
-          <div className="h-4 bg-app-secondary rounded mb-8"></div>
+        <div className="animate-pulse space-y-4">
+          <div className="h-20 bg-app-secondary rounded"></div>
+          <div className="h-32 bg-app-secondary rounded"></div>
         </div>
       </div>
     );
@@ -32,40 +34,50 @@ export default function PlayerProfile() {
   if (!player) {
     return (
       <div className="p-6 pt-12">
-        <div className="text-center text-gray-400 py-8">
-          Player not found.
+        <div className="text-center text-gray-400">
+          Игрок не найден
         </div>
       </div>
     );
   }
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
-
-  const recentMatches = matches?.slice(0, 6) || [];
+  const recentMatches = Array.isArray(matches) ? matches.slice(0, 5) : [];
+  const recentTraining = Array.isArray(training) ? training.slice(0, 5) : [];
 
   const formatDate = (date: string | Date) => {
-    return new Date(date).toLocaleDateString();
-  };
-
-  const formatMatchScore = (sets: any[]) => {
-    return sets.map(set => `${set.p1}-${set.p2}`).join(', ');
+    const d = new Date(date);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 24) {
+      return `${diffInHours}ч назад`;
+    } else if (diffInHours < 168) {
+      return `${Math.floor(diffInHours / 24)}д назад`;
+    } else {
+      return d.toLocaleDateString('ru-RU');
+    }
   };
 
   return (
     <div className="p-6 pt-12">
-      {/* Header */}
+      {/* Header with back button */}
+      <div className="flex items-center mb-6">
+        <ArrowLeft 
+          size={24} 
+          className="cursor-pointer text-gray-400 hover:text-app-primary mr-4"
+          onClick={() => setLocation('/players')}
+        />
+        <h1 className="text-xl">Профиль игрока</h1>
+      </div>
+
+      {/* Player Info */}
       <div className="text-center mb-8">
-        <Avatar className="w-24 h-24 mx-auto mb-4">
-          <AvatarImage src={player.avatarUrl} alt={player.name} />
-          <AvatarFallback className="bg-app-secondary text-app-text text-2xl">
-            {getInitials(player.name)}
-          </AvatarFallback>
-        </Avatar>
+        <div className="flex justify-center mb-4">
+          <AvatarUpload user={player} size="lg" showUploadButton={false} />
+        </div>
         <h1 className="text-2xl mb-2">{player.name}</h1>
         <p className="text-gray-400 text-sm">
-          Skill Level: {player.skillLevel || '3.0'}
+          {player.club || "Теннисист"}
         </p>
       </div>
 
@@ -75,90 +87,83 @@ export default function PlayerProfile() {
           <div className="text-2xl font-medium text-app-success">
             {player.wins || 0}
           </div>
-          <div className="text-sm text-gray-400">Wins</div>
+          <div className="text-sm text-gray-400">Побед</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-medium text-red-400">
             {player.losses || 0}
           </div>
-          <div className="text-sm text-gray-400">Losses</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-medium">
-            {player.tournamentsPlayed || 0}
-          </div>
-          <div className="text-sm text-gray-400">Tournaments</div>
+          <div className="text-sm text-gray-400">Поражений</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-medium">
             {player.matchesPlayed || 0}
           </div>
-          <div className="text-sm text-gray-400">Matches</div>
+          <div className="text-sm text-gray-400">Матчей</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-medium">
+            {player.tournamentsPlayed || 0}
+          </div>
+          <div className="text-sm text-gray-400">Турниров</div>
         </div>
       </div>
 
-      {/* Action Button */}
-      <div className="mb-8 text-center">
-        <Link href={`/match/new?opponent=${player.id}`}>
-          <button className="btn-text text-app-primary text-lg">
-            Start Match
-          </button>
-        </Link>
-      </div>
-
-      {/* Recent Matches */}
-      <div className="mb-8">
-        <h2 className="text-lg mb-4">Recent Matches</h2>
-        {matchesLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="animate-pulse">
-                <div className="h-4 bg-app-secondary rounded"></div>
-              </div>
-            ))}
+      {/* Player Info Grid */}
+      <div className="grid grid-cols-1 gap-4 mb-8">
+        {player.skillLevel && (
+          <div className="flex justify-between py-2 border-b border-app-border">
+            <span className="text-gray-400">Уровень навыка</span>
+            <span>{player.skillLevel}</span>
           </div>
-        ) : recentMatches.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3">
-            {recentMatches.map((match: any) => (
-              <div key={match.id} className="bg-app-secondary p-4 rounded-lg">
-                <div className="text-sm font-medium mb-1">
-                  vs {match.player1Id === player.id ? match.player2Name : match.player1Name}
-                </div>
-                <div className={`text-xs mb-1 ${
-                  match.winner === player.id ? 'text-app-success' : 'text-red-400'
-                }`}>
-                  {match.winner === player.id ? 'Won' : 'Lost'}
-                </div>
-                <div className="text-xs text-gray-400">
-                  {formatDate(match.date)}
-                </div>
-              </div>
-            ))}
+        )}
+        {player.playingStyle && (
+          <div className="flex justify-between py-2 border-b border-app-border">
+            <span className="text-gray-400">Стиль игры</span>
+            <span>{player.playingStyle}</span>
           </div>
-        ) : (
-          <div className="text-gray-400 text-sm">No recent matches.</div>
+        )}
+        {player.racket && (
+          <div className="flex justify-between py-2 border-b border-app-border">
+            <span className="text-gray-400">Ракетка</span>
+            <span>{player.racket}</span>
+          </div>
         )}
       </div>
 
-      {/* Additional Info */}
-      {(player.club || player.playingStyle || player.racket) && (
-        <div className="space-y-2">
-          <h2 className="text-lg mb-4">Player Info</h2>
-          {player.club && (
-            <div className="text-sm">
-              <span className="text-gray-400">Club:</span> {player.club}
-            </div>
-          )}
-          {player.playingStyle && (
-            <div className="text-sm">
-              <span className="text-gray-400">Playing Style:</span> {player.playingStyle}
-            </div>
-          )}
-          {player.racket && (
-            <div className="text-sm">
-              <span className="text-gray-400">Racket:</span> {player.racket}
-            </div>
-          )}
+      {/* Recent Matches */}
+      {recentMatches.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg mb-4">Последние матчи</h2>
+          <div className="space-y-3">
+            {recentMatches.map((match: any) => (
+              <div key={match.id} className="text-sm">
+                <span className="text-app-text">
+                  vs {match.player1Id === player.id ? match.player2Name : match.player1Name}
+                </span>
+                <span className="text-gray-400 mx-2">·</span>
+                <span className="text-gray-400">{formatDate(match.date)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Training */}
+      {recentTraining.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg mb-4">Последние тренировки</h2>
+          <div className="space-y-3">
+            {recentTraining.map((session: any) => (
+              <div key={session.id} className="text-sm">
+                <span className="text-app-text">
+                  {session.coach || 'Самостоятельная тренировка'}
+                </span>
+                <span className="text-gray-400 mx-2">·</span>
+                <span className="text-gray-400">{formatDate(session.date)}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

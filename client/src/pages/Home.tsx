@@ -66,9 +66,16 @@ export default function Home() {
       {/* Header */}
       <div className="mb-8 flex items-center gap-4">
         <AvatarUpload user={user} size="md" showUploadButton={false} />
-        <div>
-          <h1 className="text-2xl text-app-text mb-2">{user.name}</h1>
-          <p className="text-sm text-gray-400">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl text-app-text">{user.name}</h1>
+            <Edit 
+              size={16} 
+              className="text-gray-400 cursor-pointer hover:text-app-primary" 
+              onClick={() => setLocation('/profile')}
+            />
+          </div>
+          <p className="text-sm text-gray-400 mt-1">
             Побед/Поражений: {user.wins}/{user.losses} · Матчей сыграно: {user.matchesPlayed} · Турниры: {user.tournamentsPlayed}
           </p>
         </div>
@@ -87,19 +94,32 @@ export default function Home() {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentMatches.map((match: any) => (
-              <div key={match.id} className="text-sm">
-                <span className="text-app-text">
-                  vs {match.player1Id === user.id ? match.player2Name : match.player1Name}
-                </span>
-                <span className="text-gray-400 mx-2">·</span>
-                <span className={match.winner === user.id ? 'text-app-success' : 'text-red-400'}>
-                  {formatMatchScore(match.sets)}
-                </span>
-                <span className="text-gray-400 mx-2">·</span>
-                <span className="text-gray-400">{formatDate(match.date)}</span>
-              </div>
-            ))}
+            {recentMatches.map((match: any) => {
+              const opponentId = match.player1Id === user.id ? match.player2Id : match.player1Id;
+              const opponentName = match.player1Id === user.id ? match.player2Name : match.player1Name;
+              const opponent = Array.isArray(allUsers) ? allUsers.find((u: any) => u.id === opponentId) : null;
+              
+              return (
+                <div key={match.id} className="text-sm flex items-center gap-2">
+                  <span className="text-app-text">vs</span>
+                  {opponent && (
+                    <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
+                  )}
+                  <span 
+                    className="text-app-text cursor-pointer hover:underline text-blue-400"
+                    onClick={() => setLocation(`/player/${opponentId}`)}
+                  >
+                    {opponentName}
+                  </span>
+                  <span className="text-gray-400 mx-2">·</span>
+                  <span className={match.winner === user.id ? 'text-app-success' : 'text-red-400'}>
+                    {formatMatchScore(match.sets)}
+                  </span>
+                  <span className="text-gray-400 mx-2">·</span>
+                  <span className="text-gray-400">{formatDate(match.date)}</span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -144,10 +164,96 @@ export default function Home() {
         )}
       </div>
 
+      {/* Frequent Opponents */}
+      <div className="mb-8">
+        <h2 className="text-lg mb-4">Частые соперники</h2>
+        {(() => {
+          // Calculate opponent frequency
+          const opponentCount: { [key: number]: { count: number; name: string; user: any } } = {};
+          
+          if (Array.isArray(matches)) {
+            matches.forEach((match: any) => {
+              const opponentId = match.player1Id === user.id ? match.player2Id : match.player1Id;
+              const opponentName = match.player1Id === user.id ? match.player2Name : match.player1Name;
+              const opponent = Array.isArray(allUsers) ? allUsers.find((u: any) => u.id === opponentId) : null;
+              
+              if (!opponentCount[opponentId]) {
+                opponentCount[opponentId] = { count: 0, name: opponentName, user: opponent };
+              }
+              opponentCount[opponentId].count++;
+            });
+          }
+
+          const frequentOpponents = Object.values(opponentCount)
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3);
+
+          return (
+            <div className="space-y-3">
+              {frequentOpponents.map((opponent: any, index) => (
+                <div key={index} className="text-sm flex items-center gap-2">
+                  {opponent.user && (
+                    <AvatarUpload user={opponent.user} size="sm" showUploadButton={false} />
+                  )}
+                  <span 
+                    className="text-app-text cursor-pointer hover:underline text-blue-400"
+                    onClick={() => setLocation(`/player/${opponent.user?.id}`)}
+                  >
+                    {opponent.name}
+                  </span>
+                  <span className="text-gray-400 mx-2">·</span>
+                  <span className="text-gray-400">{opponent.count} матчей</span>
+                </div>
+              ))}
+              {frequentOpponents.length === 0 && (
+                <div className="text-gray-400 text-sm">Нет данных о соперниках</div>
+              )}
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* Achievements */}
+      <div className="mb-8">
+        <h2 className="text-lg mb-4">Достижения</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center p-4 bg-app-secondary rounded-lg">
+            <div className="text-xl">🏆</div>
+            <div className="text-sm text-gray-400 mt-1">Побед подряд</div>
+            <div className="text-lg font-medium">
+              {(() => {
+                if (!Array.isArray(matches)) return 0;
+                let maxStreak = 0;
+                let currentStreak = 0;
+                
+                matches.forEach((match: any) => {
+                  if (match.winner === user.id) {
+                    currentStreak++;
+                    maxStreak = Math.max(maxStreak, currentStreak);
+                  } else {
+                    currentStreak = 0;
+                  }
+                });
+                
+                return maxStreak;
+              })()}
+            </div>
+          </div>
+          
+          <div className="text-center p-4 bg-app-secondary rounded-lg">
+            <div className="text-xl">🎾</div>
+            <div className="text-sm text-gray-400 mt-1">Процент побед</div>
+            <div className="text-lg font-medium">
+              {(user.matchesPlayed || 0) > 0 ? Math.round(((user.wins || 0) / (user.matchesPlayed || 1)) * 100) : 0}%
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Check In Button */}
       <div>
         <a href="/training-checkin" className="btn-text text-app-primary">
-          Check In Training
+          Записать тренировку
         </a>
       </div>
     </div>
