@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@shared/schema";
+import AvatarUpload from "@/components/AvatarUpload";
 
 export default function Profile() {
   const { data: user, isLoading } = useQuery<User>({
@@ -21,20 +21,13 @@ export default function Profile() {
 
   if (!user) return null;
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
-
   return (
     <div className="p-6 pt-12">
       {/* Header */}
       <div className="text-center mb-8">
-        <Avatar className="w-24 h-24 mx-auto mb-4">
-          <AvatarImage src={user.avatarUrl} alt={user.name} />
-          <AvatarFallback className="bg-app-secondary text-app-text text-2xl">
-            {getInitials(user.name)}
-          </AvatarFallback>
-        </Avatar>
+        <div className="flex justify-center mb-4">
+          <AvatarUpload user={user} size="lg" showUploadButton={true} />
+        </div>
         <h1 className="text-2xl mb-2">{user.name}</h1>
         <p className="text-gray-400 text-sm">
           {user.club || "Professional Tennis Player"}

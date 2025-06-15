@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import AvatarUpload from "@/components/AvatarUpload";
 
 export default function Players() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -86,9 +86,7 @@ export default function Players() {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
+
 
   return (
     <div className="p-6 pt-12">
@@ -113,12 +111,9 @@ export default function Players() {
           return (
             <div key={player.id} className="flex items-center space-x-4">
               <Link href={`/player/${player.id}`}>
-                <Avatar className="w-12 h-12 cursor-pointer">
-                  <AvatarImage src={player.avatarUrl} alt={player.name} />
-                  <AvatarFallback className="bg-app-secondary text-app-text">
-                    {getInitials(player.name)}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="cursor-pointer">
+                  <AvatarUpload user={player} size="md" showUploadButton={false} />
+                </div>
               </Link>
               <div className="flex-1">
                 <Link href={`/player/${player.id}`}>
