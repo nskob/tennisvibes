@@ -37,16 +37,16 @@ export default function Training() {
     },
     onSuccess: () => {
       toast({
-        title: "Training Recorded",
-        description: "Your training session has been saved successfully.",
+        title: "Тренировка записана",
+        description: "Ваша тренировка успешно сохранена.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/training"] });
       setLocation("/home");
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to save training session. Please try again.",
+        title: "Ошибка",
+        description: "Не удалось сохранить тренировку. Попробуйте еще раз.",
         variant: "destructive",
       });
     },
@@ -77,23 +77,23 @@ export default function Training() {
   };
 
   const trainingTypes = [
-    { value: "serve", label: "Serve Practice" },
-    { value: "backhand", label: "Backhand Drills" },
-    { value: "physical", label: "Physical Training" },
-    { value: "match", label: "Match Play" },
+    { value: "serve", label: "Подача" },
+    { value: "backhand", label: "Бэкхенд" },
+    { value: "physical", label: "Физическая подготовка" },
+    { value: "match", label: "Игровая практика" },
   ];
 
   return (
     <div className="p-6 pt-12">
-      <h1 className="text-2xl mb-8">Training Check-In</h1>
+      <h1 className="text-2xl mb-8">Запись тренировки</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Coach */}
         <div>
-          <Label className="block text-sm mb-2">Coach</Label>
+          <Label className="block text-sm mb-2">Тренер</Label>
           <Input
             type="text"
-            placeholder="Coach name (optional)"
+            placeholder="Имя тренера (не обязательно)"
             value={form.coach}
             onChange={(e) => setForm(prev => ({ ...prev, coach: e.target.value }))}
             className="w-full bg-app-secondary text-app-text border-none"
@@ -102,10 +102,10 @@ export default function Training() {
 
         {/* Training Type */}
         <div>
-          <Label className="block text-sm mb-2">Type</Label>
+          <Label className="block text-sm mb-2">Тип</Label>
           <Select value={form.type} onValueChange={(value) => setForm(prev => ({ ...prev, type: value }))}>
             <SelectTrigger className="w-full bg-app-secondary text-app-text border-none">
-              <SelectValue placeholder="Select training type" />
+              <SelectValue placeholder="Выберите тип тренировки" />
             </SelectTrigger>
             <SelectContent>
               {trainingTypes.map((type) => (

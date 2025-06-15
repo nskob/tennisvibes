@@ -34,7 +34,7 @@ export default function League() {
 
   return (
     <div className="p-6 pt-12">
-      <h1 className="text-2xl mb-6">League Rankings</h1>
+      <h1 className="text-2xl mb-6">Рейтинг лиги</h1>
       
       {/* Rankings Table */}
       <div className="space-y-4 mb-8">

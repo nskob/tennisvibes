@@ -28,12 +28,12 @@ export default function Home() {
 
   if (!user) return null;
 
-  const recentMatches = matches?.slice(0, 3) || [];
-  const recentTraining = training?.slice(0, 3) || [];
+  const recentMatches = Array.isArray(matches) ? matches.slice(0, 3) : [];
+  const recentTraining = Array.isArray(training) ? training.slice(0, 3) : [];
 
   // Calculate recent form (last 5 matches)
-  const lastFiveMatches = matches?.slice(0, 5) || [];
-  const form = lastFiveMatches.map(match => 
+  const lastFiveMatches = Array.isArray(matches) ? matches.slice(0, 5) : [];
+  const form = lastFiveMatches.map((match: any) => 
     match.winner === user.id ? 'W' : 'L'
   );
 
