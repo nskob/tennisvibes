@@ -3,17 +3,15 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { Plus, X } from "lucide-react";
+import AvatarUpload from "@/components/AvatarUpload";
 
 interface MatchForm {
   opponentId: string;
   date: string;
-  type: string;
   sets: Array<{ p1: number; p2: number }>;
   notes: string;
 }
@@ -25,14 +23,13 @@ export default function MatchRecord() {
   const [form, setForm] = useState<MatchForm>({
     opponentId: "",
     date: new Date().toISOString().split('T')[0],
-    type: "casual",
-    sets: [
-      { p1: 0, p2: 0 },
-      { p1: 0, p2: 0 },
-      { p1: 0, p2: 0 }
-    ],
+    sets: [{ p1: 0, p2: 0 }],
     notes: ""
   });
+  
+  const [opponentSearch, setOpponentSearch] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedOpponent, setSelectedOpponent] = useState<any>(null);
 
   const { data: users } = useQuery({
     queryKey: ["/api/users"],
@@ -53,8 +50,8 @@ export default function MatchRecord() {
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to save match. Please try again.",
+        title: "Ошибка",
+        description: "Не удалось сохранить матч. Попробуйте еще раз.",
         variant: "destructive",
       });
     },
@@ -65,8 +62,8 @@ export default function MatchRecord() {
     
     if (!form.opponentId) {
       toast({
-        title: "Error",
-        description: "Please select an opponent.",
+        title: "Ошибка",
+        description: "Пожалуйста, выберите соперника.",
         variant: "destructive",
       });
       return;
@@ -77,8 +74,8 @@ export default function MatchRecord() {
     
     if (validSets.length === 0) {
       toast({
-        title: "Error",
-        description: "Please enter at least one set score.",
+        title: "Ошибка",
+        description: "Пожалуйста, введите результат хотя бы одного сета.",
         variant: "destructive",
       });
       return;
@@ -96,7 +93,7 @@ export default function MatchRecord() {
       date: new Date(form.date),
       sets: validSets,
       winner,
-      type: form.type,
+      type: "casual",
       notes: form.notes || undefined,
     };
 
@@ -113,67 +110,131 @@ export default function MatchRecord() {
     }));
   };
 
+  const addSet = () => {
+    setForm(prev => ({
+      ...prev,
+      sets: [...prev.sets, { p1: 0, p2: 0 }]
+    }));
+  };
+
+  const removeSet = (index: number) => {
+    if (form.sets.length > 1) {
+      setForm(prev => ({
+        ...prev,
+        sets: prev.sets.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   const opponents = Array.isArray(users) ? users.filter((user: any) => user.id !== 1) : [];
+  
+  const filteredOpponents = opponents.filter((user: any) =>
+    user.name.toLowerCase().includes(opponentSearch.toLowerCase())
+  );
+
+  const selectOpponent = (opponent: any) => {
+    setSelectedOpponent(opponent);
+    setForm(prev => ({ ...prev, opponentId: opponent.id.toString() }));
+    setOpponentSearch(opponent.name);
+    setShowSuggestions(false);
+  };
+
+  const clearOpponent = () => {
+    setSelectedOpponent(null);
+    setForm(prev => ({ ...prev, opponentId: "" }));
+    setOpponentSearch("");
+  };
 
   return (
-    <div className="p-6 pt-12">
-      <h1 className="text-2xl mb-8">Запись матча</h1>
+    <div className="px-4 sm:px-6 pt-8 sm:pt-12 pb-24 max-w-md mx-auto" style={{ backgroundColor: 'var(--app-bg)', color: 'var(--app-text)' }}>
+      <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">Запись матча</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Opponent Selection */}
         <div>
-          <Label className="block text-sm mb-2">Соперник</Label>
-          <Select value={form.opponentId} onValueChange={(value) => setForm(prev => ({ ...prev, opponentId: value }))}>
-            <SelectTrigger className="w-full bg-app-secondary text-app-text border-none">
-              <SelectValue placeholder="Выберите соперника" />
-            </SelectTrigger>
-            <SelectContent>
-              {opponents.map((user: any) => (
-                <SelectItem key={user.id} value={user.id.toString()}>
-                  {user.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Соперник</h3>
+          <div className="relative">
+            {selectedOpponent ? (
+              <div className="flex items-center justify-between py-3 px-4 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-3">
+                  <AvatarUpload user={selectedOpponent} size="sm" showUploadButton={false} />
+                  <span className="text-sm">{selectedOpponent.name}</span>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={clearOpponent}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Input
+                  type="text"
+                  placeholder="Поиск соперника..."
+                  value={opponentSearch}
+                  onChange={(e) => {
+                    setOpponentSearch(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  className="w-full py-3 px-4 border border-gray-200 rounded-lg"
+                />
+                {showSuggestions && opponentSearch && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filteredOpponents.length > 0 ? (
+                      filteredOpponents.map((opponent: any) => (
+                        <button
+                          key={opponent.id}
+                          type="button"
+                          onClick={() => selectOpponent(opponent)}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                        >
+                          <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
+                          <span className="text-sm">{opponent.name}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-gray-500">
+                        Соперники не найдены
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         {/* Date */}
         <div>
-          <Label className="block text-sm mb-2">Дата</Label>
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Дата</h3>
           <Input
             type="date"
             value={form.date}
             onChange={(e) => setForm(prev => ({ ...prev, date: e.target.value }))}
-            className="w-full bg-app-secondary text-app-text border-none"
+            className="w-full py-3 px-4 border border-gray-200 rounded-lg"
           />
-        </div>
-
-        {/* Match Type */}
-        <div>
-          <Label className="block text-sm mb-2">Тип</Label>
-          <RadioGroup
-            value={form.type}
-            onValueChange={(value) => setForm(prev => ({ ...prev, type: value }))}
-            className="flex space-x-4"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="casual" id="casual" />
-              <Label htmlFor="casual">Обычный</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="tournament" id="tournament" />
-              <Label htmlFor="tournament">Турнир</Label>
-            </div>
-          </RadioGroup>
         </div>
 
         {/* Score */}
         <div>
-          <Label className="block text-sm mb-2">Счет</Label>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold">Счет</h3>
+            <button
+              type="button"
+              onClick={addSet}
+              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+            >
+              <Plus size={16} />
+              Добавить сет
+            </button>
+          </div>
           <div className="space-y-3">
             {form.sets.map((set, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <span className="text-sm w-12">Сет {index + 1}:</span>
+              <div key={index} className="flex items-center gap-3">
+                <span className="text-sm w-16">Сет {index + 1}:</span>
                 <Input
                   type="number"
                   placeholder="0"
@@ -181,9 +242,9 @@ export default function MatchRecord() {
                   max="99"
                   value={set.p1 || ""}
                   onChange={(e) => updateSet(index, 'p1', e.target.value)}
-                  className="w-16 bg-app-secondary text-app-text text-center border-none"
+                  className="w-16 text-center border border-gray-200 rounded py-2"
                 />
-                <span>-</span>
+                <span className="text-gray-400">-</span>
                 <Input
                   type="number"
                   placeholder="0"
@@ -191,8 +252,17 @@ export default function MatchRecord() {
                   max="99"
                   value={set.p2 || ""}
                   onChange={(e) => updateSet(index, 'p2', e.target.value)}
-                  className="w-16 bg-app-secondary text-app-text text-center border-none"
+                  className="w-16 text-center border border-gray-200 rounded py-2"
                 />
+                {form.sets.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeSet(index)}
+                    className="text-gray-400 hover:text-red-500"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -200,23 +270,34 @@ export default function MatchRecord() {
 
         {/* Notes */}
         <div>
-          <Label className="block text-sm mb-2">Notes</Label>
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Заметки</h3>
           <Textarea
             value={form.notes}
             onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
-            placeholder="Match notes..."
+            placeholder="Заметки о матче..."
             rows={3}
-            className="w-full bg-app-secondary text-app-text border-none resize-none"
+            className="w-full border border-gray-200 rounded-lg resize-none"
           />
         </div>
 
-        <Button
-          type="submit"
-          disabled={createMatchMutation.isPending}
-          className="btn-text text-app-success bg-transparent border-none p-0 h-auto hover:bg-transparent"
-        >
-          {createMatchMutation.isPending ? "Saving..." : "Save Match"}
-        </Button>
+        <div className="flex gap-4 pt-4">
+          <Button
+            type="button"
+            onClick={() => setLocation("/home")}
+            variant="outline"
+            className="flex-1"
+          >
+            Отмена
+          </Button>
+          <Button
+            type="submit"
+            disabled={createMatchMutation.isPending}
+            className="flex-1"
+            style={{ backgroundColor: 'var(--app-primary)', color: 'var(--app-bg)' }}
+          >
+            {createMatchMutation.isPending ? "Сохранение..." : "Сохранить матч"}
+          </Button>
+        </div>
       </form>
     </div>
   );
