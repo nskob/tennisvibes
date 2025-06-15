@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { User } from "@shared/schema";
+import { User, Coach } from "@shared/schema";
 import AvatarUpload from "@/components/AvatarUpload";
 import { useLocation } from "wouter";
 import { Edit } from "lucide-react";
 import { formatMatchDate } from "@/lib/dateUtils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -22,6 +23,10 @@ export default function Home() {
 
   const { data: allUsers } = useQuery({
     queryKey: ["/api/users"],
+  });
+
+  const { data: coaches = [] } = useQuery<Coach[]>({
+    queryKey: ["/api/coaches"],
   });
 
   if (isLoading) {
@@ -138,23 +143,60 @@ export default function Home() {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentTraining.map((session: any) => (
-              <div key={session.id} className="text-sm">
-                <span className="text-app-text">
-                  {session.coach ? (
-                    <span 
-                      className="cursor-pointer hover:underline"
-                      style={{ color: '#2563eb' }}
-                      onClick={() => console.log('Navigate to coach profile:', session.coach)}
-                    >
-                      {session.coach}
-                    </span>
-                  ) : 'Самостоятельная тренировка'}
-                </span>
-                <span className="text-gray-400 mx-2">·</span>
-                <span className="text-gray-400">{formatMatchDate(session.createdAt || session.date)}</span>
-              </div>
-            ))}
+            {recentTraining.map((session: any) => {
+              const coach = coaches.find(c => c.name === session.coach);
+              return (
+                <div key={session.id} className="flex items-center space-x-3 py-2">
+                  {coach ? (
+                    <>
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage 
+                          src={coach.avatarUrl || undefined} 
+                          alt={coach.name}
+                        />
+                        <AvatarFallback className="text-xs">
+                          {coach.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span 
+                            className="cursor-pointer hover:underline text-sm font-medium"
+                            style={{ color: '#2563eb' }}
+                            onClick={() => setLocation('/coaches')}
+                          >
+                            {coach.name}
+                          </span>
+                          <span className="text-gray-400 text-xs">·</span>
+                          <span className="text-gray-400 text-xs">{formatMatchDate(session.createdAt || session.date)}</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {session.type} • {session.duration} мин
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="text-xs">
+                          СТ
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm">Самостоятельная тренировка</span>
+                          <span className="text-gray-400 text-xs">·</span>
+                          <span className="text-gray-400 text-xs">{formatMatchDate(session.createdAt || session.date)}</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {session.type} • {session.duration} мин
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
             {recentTraining.length === 0 && (
               <div className="text-gray-400 text-sm">Нет записей о тренировках</div>
             )}
