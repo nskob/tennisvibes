@@ -62,28 +62,29 @@ export default function Home() {
   };
 
   return (
-    <div className="p-6 pt-12">
+    <div className="px-4 sm:px-6 pt-8 sm:pt-12 pb-24 max-w-md mx-auto">
       {/* Header */}
-      <div className="mb-8 flex items-center gap-4">
+      <div className="mb-6 sm:mb-8 flex items-start gap-3 sm:gap-4">
         <AvatarUpload user={user} size="md" showUploadButton={false} />
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl text-app-text">{user.name}</h1>
+            <h1 className="text-xl sm:text-2xl text-app-text truncate">{user.name}</h1>
             <Edit 
               size={16} 
-              className="text-gray-400 cursor-pointer hover:text-app-primary" 
+              className="text-gray-400 cursor-pointer hover:text-app-primary flex-shrink-0" 
               onClick={() => setLocation('/profile')}
             />
           </div>
-          <p className="text-sm text-gray-400 mt-1">
-            Побед/Поражений: {user.wins}/{user.losses} · Матчей сыграно: {user.matchesPlayed} · Турниры: {user.tournamentsPlayed}
-          </p>
+          <div className="text-xs sm:text-sm text-gray-400 mt-1 space-y-1">
+            <div>Побед/Поражений: {user.wins}/{user.losses}</div>
+            <div>Матчей сыграно: {user.matchesPlayed} · Турниры: {user.tournamentsPlayed}</div>
+          </div>
         </div>
       </div>
 
       {/* Recent Matches */}
-      <div className="mb-8">
-        <h2 className="text-lg mb-4">Последние матчи</h2>
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Последние матчи</h2>
         {matchesLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
@@ -100,24 +101,26 @@ export default function Home() {
               const opponent = Array.isArray(allUsers) ? allUsers.find((u: any) => u.id === opponentId) : null;
               
               return (
-                <div key={match.id} className="text-sm flex items-center gap-2">
-                  <span className="text-app-text">vs</span>
-                  {opponent && (
-                    <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
-                  )}
-                  <span 
-                    className="cursor-pointer hover:underline"
-                    style={{ color: '#2563eb' }}
-                    onClick={() => setLocation(`/player/${opponentId}`)}
-                  >
-                    {opponentName}
-                  </span>
-                  <span className="text-gray-400 mx-2">·</span>
-                  <span className={match.winner === user.id ? 'text-app-success' : 'text-red-400'}>
-                    {formatMatchScore(match.sets)}
-                  </span>
-                  <span className="text-gray-400 mx-2">·</span>
-                  <span className="text-gray-400">{formatDate(match.date)}</span>
+                <div key={match.id} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-app-text text-sm">vs</span>
+                    {opponent && (
+                      <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
+                    )}
+                    <span 
+                      className="cursor-pointer hover:underline text-sm truncate"
+                      style={{ color: '#2563eb' }}
+                      onClick={() => setLocation(`/player/${opponentId}`)}
+                    >
+                      {opponentName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className={`font-mono ${match.winner === user.id ? 'text-green-600' : 'text-red-500'}`}>
+                      {formatMatchScore(match.sets)}
+                    </span>
+                    <span className="text-gray-400">{formatDate(match.date)}</span>
+                  </div>
                 </div>
               );
             })}
@@ -193,19 +196,20 @@ export default function Home() {
           return (
             <div className="space-y-3">
               {frequentOpponents.map((opponent: any, index) => (
-                <div key={index} className="text-sm flex items-center gap-2">
-                  {opponent.user && (
-                    <AvatarUpload user={opponent.user} size="sm" showUploadButton={false} />
-                  )}
-                  <span 
-                    className="cursor-pointer hover:underline"
-                    style={{ color: '#2563eb' }}
-                    onClick={() => setLocation(`/player/${opponent.user?.id}`)}
-                  >
-                    {opponent.name}
-                  </span>
-                  <span className="text-gray-400 mx-2">·</span>
-                  <span className="text-gray-400">{opponent.count} матчей</span>
+                <div key={index} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {opponent.user && (
+                      <AvatarUpload user={opponent.user} size="sm" showUploadButton={false} />
+                    )}
+                    <span 
+                      className="cursor-pointer hover:underline text-sm truncate"
+                      style={{ color: '#2563eb' }}
+                      onClick={() => setLocation(`/player/${opponent.user?.id}`)}
+                    >
+                      {opponent.name}
+                    </span>
+                  </div>
+                  <span className="text-gray-400 text-sm">{opponent.count} матчей</span>
                 </div>
               ))}
               {frequentOpponents.length === 0 && (
