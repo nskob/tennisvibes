@@ -29,7 +29,12 @@ export default function MatchRecord() {
 
   // Hide suggestions when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => setShowSuggestions(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.search-container')) {
+        setShowSuggestions(false);
+      }
+    };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
@@ -148,7 +153,7 @@ export default function MatchRecord() {
         {/* Opponent Selection with Search */}
         <div>
           <label className="block text-sm text-gray-600 mb-3">Соперник</label>
-          <div className="relative">
+          <div className="relative search-container">
             <div className="relative">
               <Search size={18} className="absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -159,11 +164,7 @@ export default function MatchRecord() {
                   setSearchQuery(e.target.value);
                   setShowSuggestions(true);
                 }}
-                onFocus={() => {
-                  if (!selectedOpponent) {
-                    setShowSuggestions(true);
-                  }
-                }}
+                onFocus={() => setShowSuggestions(true)}
                 className="w-full pl-6 pr-4 py-3 bg-transparent border-0 border-b-2 border-gray-200 focus:outline-none focus:border-gray-800 transition-colors"
                 style={{ backgroundColor: 'var(--app-bg)' }}
               />
