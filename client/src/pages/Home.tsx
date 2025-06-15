@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import AvatarUpload from "@/components/AvatarUpload";
 import { useLocation } from "wouter";
-import { Edit, Trophy, Users, Target, Dumbbell, Calendar } from "lucide-react";
+import { Edit } from "lucide-react";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -83,10 +83,7 @@ export default function Home() {
 
       {/* Recent Matches */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Target size={18} className="text-gray-400" />
-          <h2 className="text-xl font-semibold">Последние матчи</h2>
-        </div>
+        <h2 className="text-lg mb-4">Последние матчи</h2>
         {matchesLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
@@ -116,11 +113,8 @@ export default function Home() {
                     {opponentName}
                   </span>
                   <span className="text-gray-400 mx-2">·</span>
-                  <span className="flex items-center gap-1">
-                    <span className={`w-2 h-2 rounded-full ${match.winner === user.id ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                    <span className={match.winner === user.id ? 'text-app-success' : 'text-red-400'}>
-                      {formatMatchScore(match.sets)}
-                    </span>
+                  <span className={match.winner === user.id ? 'text-app-success' : 'text-red-400'}>
+                    {formatMatchScore(match.sets)}
                   </span>
                   <span className="text-gray-400 mx-2">·</span>
                   <span className="text-gray-400">{formatDate(match.date)}</span>
@@ -137,10 +131,7 @@ export default function Home() {
 
       {/* Recent Training */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Dumbbell size={18} className="text-gray-400" />
-          <h2 className="text-xl font-semibold">Последние тренировки</h2>
-        </div>
+        <h2 className="text-lg mb-4">Последние тренировки</h2>
         {trainingLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
@@ -177,10 +168,7 @@ export default function Home() {
 
       {/* Frequent Opponents */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Users size={18} className="text-gray-400" />
-          <h2 className="text-xl font-semibold">Частые соперники</h2>
-        </div>
+        <h2 className="text-lg mb-4">Частые соперники</h2>
         {(() => {
           // Calculate opponent frequency
           const opponentCount: { [key: number]: { count: number; name: string; user: any } } = {};
@@ -230,10 +218,7 @@ export default function Home() {
 
       {/* Achievements */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Trophy size={18} className="text-gray-400" />
-          <h2 className="text-xl font-semibold">Достижения</h2>
-        </div>
+        <h2 className="text-lg mb-4">Достижения</h2>
         <div className="space-y-3">
           <div className="text-sm flex items-center justify-between">
             <span className="text-app-text">🏆 Побед подряд</span>
