@@ -150,7 +150,7 @@ export default function MatchRecord() {
           <label className="block text-sm text-gray-600 mb-3">Соперник</label>
           <div className="relative">
             <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search size={18} className="absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder={selectedOpponent ? selectedOpponent.name : "Поиск соперника..."}
@@ -160,14 +160,15 @@ export default function MatchRecord() {
                   setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                className="w-full pl-6 pr-4 py-3 bg-transparent border-0 border-b-2 border-gray-200 focus:outline-none focus:border-gray-800 transition-colors"
+                style={{ backgroundColor: 'var(--app-bg)' }}
               />
             </div>
             
-            {showSuggestions && searchQuery && (
+            {showSuggestions && !selectedOpponent && (
               <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                {filteredOpponents.length > 0 ? (
-                  filteredOpponents.map((opponent: any) => (
+                {(searchQuery ? filteredOpponents : opponents).length > 0 ? (
+                  (searchQuery ? filteredOpponents : opponents).map((opponent: any) => (
                     <div
                       key={opponent.id}
                       className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer"
@@ -188,13 +189,16 @@ export default function MatchRecord() {
             )}
             
             {selectedOpponent && (
-              <div className="mt-3 flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mt-3 flex items-center gap-3">
                 <AvatarUpload user={selectedOpponent} size="sm" showUploadButton={false} />
-                <span className="text-sm text-blue-700">{selectedOpponent.name}</span>
+                <span className="text-sm text-gray-700">{selectedOpponent.name}</span>
                 <button
                   type="button"
-                  onClick={() => setForm(prev => ({ ...prev, opponentId: "" }))}
-                  className="ml-auto text-blue-500 hover:text-blue-700"
+                  onClick={() => {
+                    setForm(prev => ({ ...prev, opponentId: "" }));
+                    setSearchQuery("");
+                  }}
+                  className="ml-auto text-gray-400 hover:text-gray-600"
                 >
                   ×
                 </button>
@@ -221,7 +225,8 @@ export default function MatchRecord() {
               input.click();
             }}
             readOnly
-            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 cursor-pointer"
+            className="w-full py-3 bg-transparent border-0 border-b-2 border-gray-200 focus:outline-none focus:border-gray-800 cursor-pointer transition-colors"
+            style={{ backgroundColor: 'var(--app-bg)' }}
           />
         </div>
 
@@ -294,12 +299,13 @@ export default function MatchRecord() {
 
         {/* Notes */}
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Заметки (по желанию)</label>
+          <label className="block text-sm text-gray-600 mb-3">Заметки (по желанию)</label>
           <textarea
             value={form.notes}
             onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
             placeholder="Добавьте заметки о матче..."
-            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none"
+            className="w-full py-3 bg-transparent border-0 border-b-2 border-gray-200 focus:outline-none focus:border-gray-800 resize-none transition-colors"
+            style={{ backgroundColor: 'var(--app-bg)' }}
             rows={3}
           />
         </div>
