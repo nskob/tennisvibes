@@ -95,7 +95,7 @@ export default function MatchRecord() {
     const matchData = {
       player1Id: 1, // Current user
       player2Id: parseInt(form.opponentId),
-      date: new Date(form.date).toISOString(),
+      date: new Date(form.date),
       sets: validSets,
       winner,
       type: "casual",

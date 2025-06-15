@@ -84,6 +84,10 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export const insertMatchSchema = createInsertSchema(matches).omit({
   id: true,
   createdAt: true,
+}).extend({
+  date: z.union([z.string(), z.date()]).transform((val) => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
 });
 
 export const insertTrainingSchema = createInsertSchema(training).omit({
