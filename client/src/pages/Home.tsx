@@ -107,7 +107,7 @@ export default function Home() {
                   )}
                   <span 
                     className="cursor-pointer hover:underline"
-                    style={{ color: '#8B5C2A' }}
+                    style={{ color: '#2563eb' }}
                     onClick={() => setLocation(`/player/${opponentId}`)}
                   >
                     {opponentName}
@@ -148,7 +148,7 @@ export default function Home() {
                   {session.coach ? (
                     <span 
                       className="cursor-pointer hover:underline"
-                      style={{ color: '#8B5C2A' }}
+                      style={{ color: '#2563eb' }}
                       onClick={() => console.log('Navigate to coach profile:', session.coach)}
                     >
                       {session.coach}
@@ -199,7 +199,7 @@ export default function Home() {
                   )}
                   <span 
                     className="cursor-pointer hover:underline"
-                    style={{ color: '#8B5C2A' }}
+                    style={{ color: '#2563eb' }}
                     onClick={() => setLocation(`/player/${opponent.user?.id}`)}
                   >
                     {opponent.name}
