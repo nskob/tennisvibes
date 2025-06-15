@@ -229,11 +229,12 @@ export default function MatchRecord() {
               type="date"
               value={form.date}
               onChange={(e) => setForm(prev => ({ ...prev, date: e.target.value }))}
-              className="w-full py-3 bg-transparent border-0 border-b-2 border-gray-200 focus:outline-none focus:border-gray-800 cursor-pointer transition-colors text-gray-800 text-left"
+              className="w-full py-3 bg-transparent border-0 border-b-2 border-gray-200 focus:outline-none focus:border-gray-800 cursor-pointer transition-colors text-gray-800"
               style={{ 
                 backgroundColor: 'var(--app-bg)',
                 colorScheme: 'light',
-                textAlign: 'left'
+                textAlign: 'left',
+                direction: 'ltr'
               }}
             />
           </div>
