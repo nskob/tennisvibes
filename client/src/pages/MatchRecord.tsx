@@ -159,7 +159,11 @@ export default function MatchRecord() {
                   setSearchQuery(e.target.value);
                   setShowSuggestions(true);
                 }}
-                onFocus={() => setShowSuggestions(true)}
+                onFocus={() => {
+                  if (!selectedOpponent) {
+                    setShowSuggestions(true);
+                  }
+                }}
                 className="w-full pl-6 pr-4 py-3 bg-transparent border-0 border-b-2 border-gray-200 focus:outline-none focus:border-gray-800 transition-colors"
                 style={{ backgroundColor: 'var(--app-bg)' }}
               />
