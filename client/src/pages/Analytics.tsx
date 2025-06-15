@@ -40,11 +40,26 @@ export default function Analytics() {
   const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
 
   // Calculate sets statistics
-  const totalSets = matches.reduce((acc, match) => acc + match.sets.length, 0);
+  const totalSets = matches.reduce((acc, match) => {
+    if (Array.isArray(match.sets)) {
+      return acc + match.sets.length;
+    }
+    return acc;
+  }, 0);
+  
   const wonSets = matches.reduce((acc, match) => {
+    if (!Array.isArray(match.sets)) return acc;
+    
     return acc + match.sets.filter((set: any) => {
-      const [p1Score, p2Score] = set.split('-').map(Number);
-      return match.player1Id === user.id ? p1Score > p2Score : p2Score > p1Score;
+      if (typeof set === 'object' && set.p1 !== undefined && set.p2 !== undefined) {
+        // Format: {p1: 6, p2: 4}
+        return match.player1Id === user.id ? set.p1 > set.p2 : set.p2 > set.p1;
+      } else if (typeof set === 'string' && set.includes('-')) {
+        // Format: "6-4"
+        const [p1Score, p2Score] = set.split('-').map(Number);
+        return match.player1Id === user.id ? p1Score > p2Score : p2Score > p1Score;
+      }
+      return false;
     }).length;
   }, 0);
   const setWinRate = totalSets > 0 ? Math.round((wonSets / totalSets) * 100) : 0;
