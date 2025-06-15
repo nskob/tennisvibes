@@ -3,6 +3,7 @@ import { User } from "@shared/schema";
 import AvatarUpload from "@/components/AvatarUpload";
 import { useLocation } from "wouter";
 import { Edit } from "lucide-react";
+import { formatMatchDate } from "@/lib/dateUtils";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -52,17 +53,7 @@ export default function Home() {
     match.winner === user.id ? 'W' : 'L'
   );
 
-  const formatDate = (date: string | Date) => {
-    const d = new Date(date);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - d.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return "1 day ago";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 14) return "1 week ago";
-    return `${Math.floor(diffDays / 7)} weeks ago`;
-  };
+
 
   const formatMatchScore = (sets: any[]) => {
     return sets.map(set => `${set.p1}:${set.p2}`).join(' ');
@@ -126,7 +117,7 @@ export default function Home() {
                     <span className={`font-mono ${match.winner === user.id ? 'text-green-600' : 'text-red-500'}`}>
                       {formatMatchScore(match.sets)}
                     </span>
-                    <span className="text-gray-400">{formatDate(match.date)}</span>
+                    <span className="text-gray-400">{formatMatchDate(match.createdAt || match.date)}</span>
                   </div>
                 </div>
               );
@@ -166,7 +157,7 @@ export default function Home() {
                   ) : 'Самостоятельная тренировка'}
                 </span>
                 <span className="text-gray-400 mx-2">·</span>
-                <span className="text-gray-400">{formatDate(session.date)}</span>
+                <span className="text-gray-400">{formatMatchDate(session.createdAt || session.date)}</span>
               </div>
             ))}
             {recentTraining.length === 0 && (
