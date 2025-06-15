@@ -21,7 +21,7 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/">
-        {(params) => (
+        {() => (
           <Layout>
             <Switch>
               <Route path="/" component={Home} />
