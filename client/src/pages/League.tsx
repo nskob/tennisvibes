@@ -38,7 +38,7 @@ export default function League() {
       
       {/* Rankings Table */}
       <div className="space-y-4 mb-8">
-        {rankings?.map((ranking: any, index: number) => (
+        {Array.isArray(rankings) && rankings.map((ranking: any, index: number) => (
           <div key={ranking.id} className="flex items-center space-x-4 p-3 bg-app-secondary rounded-lg">
             <div className="w-8 text-center font-medium">
               {index + 1}
@@ -47,14 +47,26 @@ export default function League() {
               user={{ 
                 id: ranking.userId, 
                 name: ranking.userName, 
-                avatarUrl: ranking.userAvatar 
+                avatarUrl: ranking.userAvatar,
+                username: ranking.userName || '',
+                password: '',
+                skillLevel: null,
+                club: null,
+                playingStyle: null,
+                racket: null,
+
+                wins: 0,
+                losses: 0,
+                matchesPlayed: 0,
+                tournamentsPlayed: 0,
+                createdAt: null
               }} 
               size="md" 
               showUploadButton={false} 
             />
             <div className="flex-1">
-              <div className="font-medium">{ranking.userName || 'Unknown Player'}</div>
-              <div className="text-sm text-gray-400">{ranking.rating} pts</div>
+              <div className="font-medium">{ranking.userName || 'Неизвестный игрок'}</div>
+              <div className="text-sm text-gray-400">{ranking.rating} очков</div>
             </div>
             {index < 3 && (
               <div className="text-2xl">
@@ -64,9 +76,9 @@ export default function League() {
           </div>
         ))}
         
-        {!rankings || rankings.length === 0 && (
+        {(!Array.isArray(rankings) || rankings.length === 0) && (
           <div className="text-center text-gray-400 py-8">
-            No rankings available yet. Play some rated matches to get ranked!
+            Рейтинг пока не доступен. Сыграйте рейтинговые матчи, чтобы попасть в рейтинг!
           </div>
         )}
       </div>

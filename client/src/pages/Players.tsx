@@ -69,14 +69,14 @@ export default function Players() {
   }
 
   // Filter out current user and apply search
-  const players = (users || [])
+  const players = Array.isArray(users) ? users
     .filter((user: any) => user.id !== 1)
     .filter((user: any) => 
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ) : [];
 
-  const followedPlayerIds = new Set((follows || []).map((follow: any) => follow.followingId));
+  const followedPlayerIds = new Set(Array.isArray(follows) ? follows.map((follow: any) => follow.followingId) : []);
 
   const handleFollowToggle = (playerId: number, isFollowing: boolean) => {
     if (isFollowing) {

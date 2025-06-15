@@ -45,8 +45,8 @@ export default function MatchRecord() {
     },
     onSuccess: () => {
       toast({
-        title: "Match Recorded",
-        description: "Your match has been saved successfully.",
+        title: "Матч записан",
+        description: "Ваш матч успешно сохранен.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
       setLocation("/home");
@@ -113,11 +113,11 @@ export default function MatchRecord() {
     }));
   };
 
-  const opponents = users?.filter((user: any) => user.id !== 1) || [];
+  const opponents = Array.isArray(users) ? users.filter((user: any) => user.id !== 1) : [];
 
   return (
     <div className="p-6 pt-12">
-      <h1 className="text-2xl mb-8">Record Match</h1>
+      <h1 className="text-2xl mb-8">Запись матча</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Opponent Selection */}
