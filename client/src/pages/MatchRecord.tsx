@@ -258,7 +258,8 @@ export default function MatchRecord() {
                   max="99"
                   value={set.p2 || ""}
                   onChange={(e) => updateSet(index, 'p2', e.target.value)}
-                  className="w-16 text-center border border-gray-200 rounded py-2"
+                  className="w-16 text-center border rounded py-2"
+                  style={{ borderColor: 'var(--app-border)', backgroundColor: 'var(--app-secondary)', color: 'var(--app-text)' }}
                 />
                 {form.sets.length > 1 && (
                   <button
@@ -282,7 +283,8 @@ export default function MatchRecord() {
             onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
             placeholder="Заметки о матче..."
             rows={3}
-            className="w-full border border-gray-200 rounded-lg resize-none"
+            className="w-full border rounded-lg resize-none"
+            style={{ borderColor: 'var(--app-border)', backgroundColor: 'var(--app-secondary)', color: 'var(--app-text)' }}
           />
         </div>
 
