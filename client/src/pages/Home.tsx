@@ -106,7 +106,8 @@ export default function Home() {
                     <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
                   )}
                   <span 
-                    className="text-app-text cursor-pointer hover:underline text-blue-400"
+                    className="cursor-pointer hover:underline"
+                    style={{ color: '#8B5C2A' }}
                     onClick={() => setLocation(`/player/${opponentId}`)}
                   >
                     {opponentName}
@@ -197,7 +198,8 @@ export default function Home() {
                     <AvatarUpload user={opponent.user} size="sm" showUploadButton={false} />
                   )}
                   <span 
-                    className="text-app-text cursor-pointer hover:underline text-blue-400"
+                    className="cursor-pointer hover:underline"
+                    style={{ color: '#8B5C2A' }}
                     onClick={() => setLocation(`/player/${opponent.user?.id}`)}
                   >
                     {opponent.name}
