@@ -146,7 +146,8 @@ export default function Home() {
                 <span className="text-app-text">
                   {session.coach ? (
                     <span 
-                      className="cursor-pointer hover:underline text-blue-400"
+                      className="cursor-pointer hover:underline"
+                      style={{ color: '#8B5C2A' }}
                       onClick={() => console.log('Navigate to coach profile:', session.coach)}
                     >
                       {session.coach}
@@ -216,11 +217,10 @@ export default function Home() {
       {/* Achievements */}
       <div className="mb-8">
         <h2 className="text-lg mb-4">Достижения</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-app-secondary rounded-lg">
-            <div className="text-xl">🏆</div>
-            <div className="text-sm text-gray-400 mt-1">Побед подряд</div>
-            <div className="text-lg font-medium">
+        <div className="space-y-3">
+          <div className="text-sm flex items-center justify-between">
+            <span className="text-app-text">🏆 Побед подряд</span>
+            <span className="text-gray-400">
               {(() => {
                 if (!Array.isArray(matches)) return 0;
                 let maxStreak = 0;
@@ -237,15 +237,14 @@ export default function Home() {
                 
                 return maxStreak;
               })()}
-            </div>
+            </span>
           </div>
           
-          <div className="text-center p-4 bg-app-secondary rounded-lg">
-            <div className="text-xl">🎾</div>
-            <div className="text-sm text-gray-400 mt-1">Процент побед</div>
-            <div className="text-lg font-medium">
+          <div className="text-sm flex items-center justify-between">
+            <span className="text-app-text">🎾 Процент побед</span>
+            <span className="text-gray-400">
               {(user.matchesPlayed || 0) > 0 ? Math.round(((user.wins || 0) / (user.matchesPlayed || 1)) * 100) : 0}%
-            </div>
+            </span>
           </div>
         </div>
       </div>

@@ -93,9 +93,9 @@ export class MemStorage implements IStorage {
 
     // Create other players
     const players = [
-      { name: "Ethan Carter", username: "ethan", skillLevel: "4.0" },
-      { name: "Sophia Bennett", username: "sophia", skillLevel: "3.5" },
-      { name: "Lucas Harper", username: "lucas", skillLevel: "4.2" },
+      { name: "Rafael Nadal", username: "rafa", skillLevel: "5.0", avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" },
+      { name: "Novak Djokovic", username: "novak", skillLevel: "5.0", avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face" },
+      { name: "Carlos Alcaraz", username: "carlos", skillLevel: "4.8", avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face" },
     ];
 
     players.forEach((player, index) => {
@@ -105,7 +105,7 @@ export class MemStorage implements IStorage {
         name: player.name,
         username: player.username,
         password: "password",
-        avatarUrl: null,
+        avatarUrl: player.avatarUrl,
         skillLevel: player.skillLevel,
         club: null,
         playingStyle: null,
