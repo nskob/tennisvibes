@@ -1,8 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
-import { TrendingUp, TrendingDown, Trophy, Target, Zap, Activity } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 import type { User, Match, Training } from "@shared/schema";
@@ -128,146 +125,104 @@ export default function Analytics() {
         </div>
 
         {/* Overview Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className="p-4" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Процент побед</p>
-                <p className="text-2xl font-bold">{winRate}%</p>
-              </div>
-              <Trophy className="h-8 w-8 text-yellow-500" />
-            </div>
-          </Card>
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-1">Процент побед</p>
+            <p className="text-3xl font-bold text-app-text">{winRate}%</p>
+          </div>
 
-          <Card className="p-4" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Всего матчей</p>
-                <p className="text-2xl font-bold">{totalMatches}</p>
-              </div>
-              <Target className="h-8 w-8 text-blue-500" />
-            </div>
-          </Card>
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-1">Всего матчей</p>
+            <p className="text-3xl font-bold text-app-text">{totalMatches}</p>
+          </div>
 
-          <Card className="p-4" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Процент сетов</p>
-                <p className="text-2xl font-bold">{setWinRate}%</p>
-              </div>
-              <Zap className="h-8 w-8 text-green-500" />
-            </div>
-          </Card>
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-1">Процент сетов</p>
+            <p className="text-3xl font-bold text-app-text">{setWinRate}%</p>
+          </div>
 
-          <Card className="p-4" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Серия</p>
-                <p className="text-2xl font-bold">{currentStreak}</p>
-                <Badge variant={streakType === 'win' ? 'default' : 'destructive'} className="text-xs">
-                  {streakType === 'win' ? 'Побед' : 'Поражений'}
-                </Badge>
-              </div>
-              {streakType === 'win' ? 
-                <TrendingUp className="h-8 w-8 text-green-500" /> : 
-                <TrendingDown className="h-8 w-8 text-red-500" />
-              }
-            </div>
-          </Card>
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-1">Серия</p>
+            <p className="text-3xl font-bold text-app-text">{currentStreak}</p>
+            <p className={`text-xs ${streakType === 'win' ? 'text-green-600' : 'text-red-600'}`}>
+              {streakType === 'win' ? 'Побед' : 'Поражений'}
+            </p>
+          </div>
         </div>
 
         {/* Win/Loss Chart */}
         {chartData.length > 0 && (
-          <Card className="p-6 mb-6" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
+          <div className="mb-8">
             <h3 className="text-lg font-semibold mb-4">Прогресс побед и поражений</h3>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--app-border)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
                 <XAxis dataKey="match" stroke="var(--app-text)" />
                 <YAxis stroke="var(--app-text)" />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'var(--app-secondary)', 
-                    border: '1px solid var(--app-border)',
-                    borderRadius: '6px'
+                    backgroundColor: 'white', 
+                    border: '1px solid #e5e5e5',
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                   }}
                 />
                 <Line type="monotone" dataKey="wins" stroke="#22c55e" strokeWidth={2} />
                 <Line type="monotone" dataKey="losses" stroke="#ef4444" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
-          </Card>
+          </div>
         )}
 
         {/* Win/Loss Distribution */}
         {totalMatches > 0 && (
-          <Card className="p-6 mb-6" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
+          <div className="mb-8">
             <h3 className="text-lg font-semibold mb-4">Распределение результатов</h3>
-            <div className="flex items-center justify-center">
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex justify-center space-x-6 mt-4">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                <span className="text-sm">Победы: {wins}</span>
+            <div className="flex justify-center space-x-8 mb-4">
+              <div className="text-center">
+                <div className="w-4 h-4 bg-green-500 rounded-full mx-auto mb-2"></div>
+                <span className="text-sm text-gray-600">Победы</span>
+                <p className="text-xl font-bold">{wins}</p>
               </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                <span className="text-sm">Поражения: {losses}</span>
+              <div className="text-center">
+                <div className="w-4 h-4 bg-red-500 rounded-full mx-auto mb-2"></div>
+                <span className="text-sm text-gray-600">Поражения</span>
+                <p className="text-xl font-bold">{losses}</p>
               </div>
             </div>
-          </Card>
+          </div>
         )}
 
         {/* Training Frequency */}
         {trainingData.length > 0 && (
-          <Card className="p-6 mb-6" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
+          <div className="mb-8">
             <h3 className="text-lg font-semibold mb-4">Частота тренировок</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={trainingData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--app-border)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
                 <XAxis dataKey="month" stroke="var(--app-text)" />
                 <YAxis stroke="var(--app-text)" />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'var(--app-secondary)', 
-                    border: '1px solid var(--app-border)',
-                    borderRadius: '6px'
+                    backgroundColor: 'white', 
+                    border: '1px solid #e5e5e5',
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                   }}
                 />
                 <Bar dataKey="sessions" fill="#3b82f6" />
               </BarChart>
             </ResponsiveContainer>
-          </Card>
+          </div>
         )}
 
         {/* Personal Records */}
-        <Card className="p-6 mb-6" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
+        <div className="mb-8">
           <h3 className="text-lg font-semibold mb-4">Личные рекорды</h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Activity className="h-5 w-5 text-blue-500 mr-3" />
-                <span>Самая длинная серия побед</span>
-              </div>
-              <Badge variant="outline">
+            <div className="flex items-center justify-between py-2">
+              <span className="text-app-text">Самая длинная серия побед</span>
+              <span className="font-semibold">
                 {Math.max(...matches.reduce((streaks: number[], _, index) => {
                   let streak = 0;
                   for (let i = index; i < matches.length; i++) {
@@ -280,37 +235,30 @@ export default function Analytics() {
                   streaks.push(streak);
                   return streaks;
                 }, []), 0)}
-              </Badge>
+              </span>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Trophy className="h-5 w-5 text-yellow-500 mr-3" />
-                <span>Всего тренировок</span>
-              </div>
-              <Badge variant="outline">{trainingSessions.length}</Badge>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-app-text">Всего тренировок</span>
+              <span className="font-semibold">{trainingSessions.length}</span>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Target className="h-5 w-5 text-green-500 mr-3" />
-                <span>Лучший месяц</span>
-              </div>
-              <Badge variant="outline">
+            <div className="flex items-center justify-between py-2">
+              <span className="text-app-text">Лучший месяц</span>
+              <span className="font-semibold">
                 {trainingData.length > 0 ? 
                   trainingData.reduce((best: any, current: any) => 
                     current.sessions > best.sessions ? current : best
                   ).month : 'Нет данных'}
-              </Badge>
+              </span>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Apple Health Integration Placeholder */}
-        <Card className="p-6" style={{ backgroundColor: 'var(--app-secondary)', borderColor: 'var(--app-border)' }}>
+        <div className="mb-8">
           <h3 className="text-lg font-semibold mb-4">Интеграция с Apple Health</h3>
-          <div className="text-center py-8">
-            <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <div className="text-center py-6">
             <p className="text-gray-600 mb-4">Синхронизация данных о тренировках и пульсе</p>
             <button 
               className="px-6 py-2 rounded-lg font-medium"
@@ -323,7 +271,7 @@ export default function Analytics() {
               Подключить Apple Health
             </button>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );
