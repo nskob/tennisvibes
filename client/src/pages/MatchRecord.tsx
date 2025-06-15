@@ -224,24 +224,18 @@ export default function MatchRecord() {
         {/* Date */}
         <div>
           <label className="block text-sm text-gray-600 mb-3">Дата</label>
-          <input
-            type="text"
-            value={new Date(form.date).toLocaleDateString('ru-RU', { 
-              day: 'numeric', 
-              month: 'long', 
-              year: 'numeric' 
-            })}
-            onClick={() => {
-              const input = document.createElement('input');
-              input.type = 'date';
-              input.value = form.date;
-              input.onchange = (e) => setForm(prev => ({ ...prev, date: (e.target as HTMLInputElement).value }));
-              input.click();
-            }}
-            readOnly
-            className="w-full py-3 bg-transparent border-0 border-b-2 border-gray-200 focus:outline-none focus:border-gray-800 cursor-pointer transition-colors"
-            style={{ backgroundColor: 'var(--app-bg)' }}
-          />
+          <div className="relative">
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm(prev => ({ ...prev, date: e.target.value }))}
+              className="w-full py-3 bg-transparent border-0 border-b-2 border-gray-200 focus:outline-none focus:border-gray-800 cursor-pointer transition-colors text-gray-800"
+              style={{ 
+                backgroundColor: 'var(--app-bg)',
+                colorScheme: 'light'
+              }}
+            />
+          </div>
         </div>
 
         {/* Sets */}
