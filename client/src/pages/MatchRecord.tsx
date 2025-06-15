@@ -148,20 +148,20 @@ export default function MatchRecord() {
   return (
     <div className="px-4 sm:px-6 pt-8 sm:pt-12 pb-24 max-w-md mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-6 sm:mb-8">
         <button 
           onClick={() => setLocation('/')}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft size={20} className="text-gray-600" />
         </button>
-        <h1 className="text-xl sm:text-2xl font-semibold">Запись матча</h1>
+        <h1 className="text-xl sm:text-2xl text-app-text">Запись матча</h1>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Opponent Selection with Search */}
         <div>
-          <label className="block text-sm text-gray-600 mb-3">Соперник</label>
+          <label className="block text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-app-text">Соперник</label>
           <div className="relative search-container">
             <div className="relative">
               <Search size={18} className="absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -223,7 +223,7 @@ export default function MatchRecord() {
 
         {/* Date */}
         <div>
-          <label className="block text-sm text-gray-600 mb-3">Дата</label>
+          <label className="block text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-app-text">Дата</label>
           <div className="relative">
             <input
               type="date"
@@ -242,12 +242,12 @@ export default function MatchRecord() {
 
         {/* Sets */}
         <div>
-          <label className="block text-sm text-gray-600 mb-4">Счет по сетам</label>
+          <label className="block text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-app-text">Счет по сетам</label>
           <div className="space-y-6">
             {form.sets.map((set, index) => (
               <div key={index}>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-700">Сет {index + 1}</span>
+                  <span className="text-sm text-app-text">Сет {index + 1}</span>
                   {index > 0 && (
                     <button
                       type="button"
@@ -321,7 +321,7 @@ export default function MatchRecord() {
 
         {/* Notes */}
         <div>
-          <label className="block text-sm text-gray-600 mb-3">Заметки (по желанию)</label>
+          <label className="block text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-app-text">Заметки (по желанию)</label>
           <textarea
             value={form.notes}
             onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
