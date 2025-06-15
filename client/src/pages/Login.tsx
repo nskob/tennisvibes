@@ -1,95 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-
-declare global {
-  interface Window {
-    Telegram: {
-      Login: {
-        auth: (options: {
-          bot_id: string;
-          request_access: string;
-          embed: number;
-          lang?: string;
-        }, callback: (user: any) => void) => void;
-      };
-    };
-  }
-}
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // Load Telegram Login Widget script
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.async = true;
-    script.onload = () => {
-      initTelegramLogin();
-    };
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
-  const initTelegramLogin = () => {
-    if (window.Telegram?.Login) {
-      window.Telegram.Login.auth(
-        {
-          bot_id: process.env.VITE_TELEGRAM_BOT_ID || 'demo_bot',
-          request_access: 'write',
-          embed: 1,
-          lang: 'ru'
-        },
-        (user) => {
-          handleTelegramAuth(user);
-        }
-      );
-    }
-  };
-
-  const handleTelegramAuth = async (user: any) => {
-    if (!user) return;
-    
+  const handleTelegramLogin = async () => {
     setIsLoading(true);
     
     try {
-      // Send user data to backend for authentication
-      const response = await fetch('/api/auth/telegram', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: user.id,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          username: user.username,
-          photo_url: user.photo_url,
-          auth_date: user.auth_date,
-          hash: user.hash
-        }),
+      // Simulate Telegram login with demo data
+      toast({
+        title: "Функция в разработке",
+        description: "Telegram авторизация будет доступна в следующих версиях",
       });
-
-      if (response.ok) {
-        const userData = await response.json();
-        toast({
-          title: "Успешная авторизация",
-          description: `Добро пожаловать, ${userData.name}!`,
-        });
-        setLocation('/');
-      } else {
-        throw new Error('Authentication failed');
-      }
     } catch (error) {
       toast({
-        title: "Ошибка авторизации",
-        description: "Не удалось войти через Telegram. Попробуйте еще раз.",
+        title: "Ошибка",
+        description: "Не удалось выполнить вход",
         variant: "destructive",
       });
     } finally {
@@ -101,27 +31,16 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      // Demo login for development
-      const response = await fetch('/api/auth/demo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // Demo login
+      toast({
+        title: "Демо-вход",
+        description: "Добро пожаловать в Set Point!",
       });
-
-      if (response.ok) {
-        toast({
-          title: "Демо-вход",
-          description: "Вы вошли как демо-пользователь",
-        });
-        setLocation('/');
-      } else {
-        throw new Error('Demo login failed');
-      }
+      setLocation('/');
     } catch (error) {
       toast({
         title: "Ошибка",
-        description: "Не удалось выполнить демо-вход",
+        description: "Не удалось выполнить вход",
         variant: "destructive",
       });
     } finally {
@@ -152,7 +71,7 @@ export default function Login() {
               className="flex justify-center"
             >
               <button
-                onClick={initTelegramLogin}
+                onClick={handleTelegramLogin}
                 disabled={isLoading}
                 className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
               >
