@@ -13,12 +13,14 @@ import Profile from "@/pages/Profile";
 import Tournaments from "@/pages/Tournaments";
 import League from "@/pages/League";
 import Analytics from "@/pages/Analytics";
+import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
+    <Switch>
+      <Route path="/login" component={Login} />
+      <Layout>
         <Route path="/" component={Home} />
         <Route path="/home" component={Home} />
         <Route path="/match/new" component={MatchRecord} />
@@ -30,8 +32,8 @@ function Router() {
         <Route path="/analytics" component={Analytics} />
         <Route path="/league" component={League} />
         <Route component={NotFound} />
-      </Switch>
-    </Layout>
+      </Layout>
+    </Switch>
   );
 }
 

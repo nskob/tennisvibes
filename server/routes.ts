@@ -5,6 +5,7 @@ import { insertUserSchema, insertMatchSchema, insertTrainingSchema, insertTourna
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import crypto from "crypto";
 
 // Configure multer for avatar uploads
 const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
