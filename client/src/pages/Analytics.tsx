@@ -9,16 +9,16 @@ import type { User, Match, Training } from "@shared/schema";
 
 export default function Analytics() {
   const { data: user } = useQuery<User>({
-    queryKey: ["/api/user"],
+    queryKey: ["/api/users/1"],
   });
 
   const { data: matches = [] } = useQuery<Match[]>({
-    queryKey: ["/api/matches", "user", user?.id],
+    queryKey: ["/api/matches/user/1"],
     enabled: !!user?.id,
   });
 
   const { data: trainingSessions = [] } = useQuery<Training[]>({
-    queryKey: ["/api/training", "user", user?.id],
+    queryKey: ["/api/training/user/1"],
     enabled: !!user?.id,
   });
 
