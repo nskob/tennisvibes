@@ -133,8 +133,8 @@ export default function Home() {
 
 
       {/* Recent Training */}
-      <div className="mb-8">
-        <h2 className="text-lg mb-4">Последние тренировки</h2>
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Последние тренировки</h2>
         {trainingLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
@@ -170,8 +170,8 @@ export default function Home() {
       </div>
 
       {/* Frequent Opponents */}
-      <div className="mb-8">
-        <h2 className="text-lg mb-4">Частые соперники</h2>
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Частые соперники</h2>
         {(() => {
           // Calculate opponent frequency
           const opponentCount: { [key: number]: { count: number; name: string; user: any } } = {};

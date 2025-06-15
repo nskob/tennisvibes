@@ -123,3 +123,46 @@
 .border-app-border {
   border-color: var(--app-border);
 }
+
+/* Mobile-first responsive design */
+@media (max-width: 480px) {
+  /* Button minimum touch target */
+  button {
+    min-height: 44px;
+  }
+  
+  /* Ensure proper spacing on small screens */
+  .space-y-3 > * + * {
+    margin-top: 0.5rem !important;
+  }
+  
+  /* Responsive text sizes */
+  h1 {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+  
+  /* Improved list item spacing */
+  .match-item, .training-item, .opponent-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--app-border);
+  }
+  
+  .match-item:last-child, 
+  .training-item:last-child, 
+  .opponent-item:last-child {
+    border-bottom: none;
+  }
+  
+  /* Better score display on mobile */
+  .score-display {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", monospace;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+}
