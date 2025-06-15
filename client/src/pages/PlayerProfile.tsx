@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import AvatarUpload from "@/components/AvatarUpload";
 import { ArrowLeft } from "lucide-react";
+import { formatMatchDate } from "@/lib/dateUtils";
 
 export default function PlayerProfile() {
   const params = useParams();
@@ -142,7 +143,7 @@ export default function PlayerProfile() {
                   vs {match.player1Id === player.id ? match.player2Name : match.player1Name}
                 </span>
                 <span className="text-gray-400 mx-2">·</span>
-                <span className="text-gray-400">{formatDate(match.date)}</span>
+                <span className="text-gray-400">{formatMatchDate(match.createdAt || match.date)}</span>
               </div>
             ))}
           </div>
@@ -160,7 +161,7 @@ export default function PlayerProfile() {
                   {session.coach || 'Самостоятельная тренировка'}
                 </span>
                 <span className="text-gray-400 mx-2">·</span>
-                <span className="text-gray-400">{formatDate(session.date)}</span>
+                <span className="text-gray-400">{formatMatchDate(session.createdAt || session.date)}</span>
               </div>
             ))}
           </div>

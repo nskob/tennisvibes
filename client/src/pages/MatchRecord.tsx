@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { ArrowLeft, Minus, Plus, Search, Trash2 } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
+import { formatForDateInput, toISOString } from "@/lib/dateUtils";
 
 interface MatchForm {
   opponentId: string;
@@ -19,7 +20,7 @@ export default function MatchRecord() {
   
   const [form, setForm] = useState<MatchForm>({
     opponentId: "",
-    date: new Date().toISOString().split('T')[0],
+    date: formatForDateInput(),
     sets: [{ p1: 0, p2: 0 }],
     notes: ""
   });
@@ -101,7 +102,7 @@ export default function MatchRecord() {
     const matchData = {
       player1Id: 1, // Current user
       player2Id: parseInt(form.opponentId),
-      date: new Date(form.date),
+      date: toISOString(form.date),
       sets: validSets,
       winner,
       type: "casual",

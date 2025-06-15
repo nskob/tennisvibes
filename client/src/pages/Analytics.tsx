@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { formatDistanceToNow } from "date-fns";
-import { ru } from "date-fns/locale";
+import { formatMatchDate, formatAbsoluteDate } from "@/lib/dateUtils";
 import type { User, Match, Training } from "@shared/schema";
 
 export default function Analytics() {
