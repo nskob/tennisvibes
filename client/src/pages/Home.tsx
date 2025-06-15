@@ -1,8 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import AvatarUpload from "@/components/AvatarUpload";
+import { useLocation } from "wouter";
+import { Edit } from "lucide-react";
 
 export default function Home() {
+  const [, setLocation] = useLocation();
+  
   const { data: user, isLoading } = useQuery<User>({
     queryKey: ["/api/users/1"], // Main user ID is 1
   });
@@ -13,6 +17,10 @@ export default function Home() {
 
   const { data: training, isLoading: trainingLoading } = useQuery({
     queryKey: ["/api/training/user/1"],
+  });
+
+  const { data: allUsers } = useQuery({
+    queryKey: ["/api/users"],
   });
 
   if (isLoading) {
@@ -96,25 +104,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* Form Streak */}
-      <div className="mb-8">
-        <h2 className="text-lg mb-4">Последняя форма</h2>
-        <div className="flex space-x-3">
-          {form.map((result, index) => (
-            <div
-              key={index}
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs ${
-                result === 'W' ? 'bg-app-success' : 'bg-red-500'
-              }`}
-            >
-              {result === 'W' ? 'П' : 'Р'}
-            </div>
-          ))}
-          {form.length === 0 && (
-            <div className="text-gray-400 text-sm">Нет последних матчей</div>
-          )}
-        </div>
-      </div>
+
 
 
 
@@ -133,18 +123,18 @@ export default function Home() {
           <div className="space-y-3">
             {recentTraining.map((session: any) => (
               <div key={session.id} className="text-sm">
-                <div className="flex justify-between">
-                  <span className="text-app-text">
-                    Тренер: {session.coach}
-                  </span>
-                  <span className="text-gray-400">{formatDate(session.date)}</span>
-                </div>
-                <div className="text-gray-400 text-xs mt-1">
-                  {session.type === 'technique' ? 'Техника' : 
-                   session.type === 'fitness' ? 'Физическая подготовка' :
-                   session.type === 'match' ? 'Игровая практика' : 
-                   session.type}
-                </div>
+                <span className="text-app-text">
+                  {session.coach ? (
+                    <span 
+                      className="cursor-pointer hover:underline text-blue-400"
+                      onClick={() => console.log('Navigate to coach profile:', session.coach)}
+                    >
+                      {session.coach}
+                    </span>
+                  ) : 'Самостоятельная тренировка'}
+                </span>
+                <span className="text-gray-400 mx-2">·</span>
+                <span className="text-gray-400">{formatDate(session.date)}</span>
               </div>
             ))}
             {recentTraining.length === 0 && (
