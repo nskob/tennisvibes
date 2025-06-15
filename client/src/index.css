@@ -60,11 +60,16 @@
     @apply border-border;
   }
 
+  html {
+    background-color: var(--app-bg);
+  }
+
   body {
     @apply font-sans antialiased text-foreground;
     background-color: var(--app-bg);
     color: var(--app-text);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    min-height: 100vh;
   }
 }
 
