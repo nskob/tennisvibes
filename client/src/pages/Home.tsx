@@ -127,6 +127,13 @@ export default function Home() {
                 </div>
               );
             })}
+            {recentMatches.length === 0 && (
+              <div className="text-center py-8">
+                <Target size={48} className="text-gray-300 mx-auto mb-3" />
+                <div className="text-gray-400 text-sm mb-2">Нет записанных матчей</div>
+                <div className="text-gray-500 text-xs">Добавьте свой первый матч, нажав кнопку "+" внизу</div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -169,7 +176,11 @@ export default function Home() {
               </div>
             ))}
             {recentTraining.length === 0 && (
-              <div className="text-gray-400 text-sm">Нет записей о тренировках</div>
+              <div className="text-center py-8">
+                <Dumbbell size={48} className="text-gray-300 mx-auto mb-3" />
+                <div className="text-gray-400 text-sm mb-2">Нет записей о тренировках</div>
+                <div className="text-gray-500 text-xs">Записывайте свои тренировки в разделе "Тренировки"</div>
+              </div>
             )}
           </div>
         )}
@@ -221,7 +232,11 @@ export default function Home() {
                 </div>
               ))}
               {frequentOpponents.length === 0 && (
-                <div className="text-gray-400 text-sm">Нет данных о соперниках</div>
+                <div className="text-center py-8">
+                  <Users size={48} className="text-gray-300 mx-auto mb-3" />
+                  <div className="text-gray-400 text-sm mb-2">Нет частых соперников</div>
+                  <div className="text-gray-500 text-xs">Играйте больше матчей, чтобы увидеть статистику соперников</div>
+                </div>
               )}
             </div>
           );
