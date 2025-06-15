@@ -3,28 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(42, 25%, 94%);
+  /* Tennis app colors - iBooks Focus Mode warm theme */
+  --background: hsl(42, 28%, 94%);
   --foreground: hsl(0, 0%, 12%);
-  --muted: hsl(42, 15%, 87%);
+  --muted: hsl(42, 18%, 88%);
   --muted-foreground: hsl(0, 0%, 40%);
-  --popover: hsl(42, 25%, 94%);
+  --popover: hsl(42, 28%, 94%);
   --popover-foreground: hsl(0, 0%, 12%);
-  --card: hsl(42, 25%, 94%);
+  --card: hsl(42, 28%, 94%);
   --card-foreground: hsl(0, 0%, 12%);
-  --border: hsl(42, 12%, 82%);
-  --input: hsl(42, 15%, 90%);
-  --primary: hsl(210, 50%, 45%);
-  --primary-foreground: hsl(42, 25%, 94%);
-  --secondary: hsl(42, 15%, 87%);
+  --border: hsl(42, 12%, 80%);
+  --input: hsl(42, 18%, 88%);
+  --primary: hsl(210, 55%, 45%);
+  --primary-foreground: hsl(42, 28%, 94%);
+  --secondary: hsl(42, 18%, 88%);
   --secondary-foreground: hsl(0, 0%, 12%);
-  --accent: hsl(42, 15%, 87%);
+  --accent: hsl(42, 18%, 88%);
   --accent-foreground: hsl(0, 0%, 12%);
   --destructive: hsl(0, 80%, 55%);
-  --destructive-foreground: hsl(42, 25%, 94%);
-  --ring: hsl(210, 50%, 45%);
+  --destructive-foreground: hsl(42, 28%, 94%);
+  --ring: hsl(210, 55%, 45%);
   --radius: 0.5rem;
   
-  /* Tennis app custom colors - iBooks Focus Mode */
+  /* Custom app variables */
   --app-bg: hsl(42, 28%, 94%);
   --app-text: hsl(0, 0%, 12%);
   --app-primary: hsl(210, 55%, 45%);
@@ -61,13 +62,11 @@
   }
 
   html {
-    background-color: var(--app-bg);
+    @apply bg-background;
   }
 
   body {
-    @apply font-sans antialiased text-foreground;
-    background-color: var(--app-bg);
-    color: var(--app-text);
+    @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     min-height: 100vh;
   }
