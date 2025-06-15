@@ -30,7 +30,7 @@ export default function Profile() {
         </div>
         <h1 className="text-2xl mb-2">{user.name}</h1>
         <p className="text-gray-400 text-sm">
-          {user.club || "Professional Tennis Player"}
+          {user.club || "Профессиональный теннисист"}
         </p>
       </div>
 

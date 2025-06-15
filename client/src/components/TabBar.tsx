@@ -6,10 +6,10 @@ export default function TabBar() {
   const [location] = useLocation();
 
   const tabs = [
-    { path: "/home", icon: Home, label: "Home" },
-    { path: "/players", icon: Users, label: "Players" },
-    { path: "/training-checkin", icon: Dumbbell, label: "Training" },
-    { path: "/profile", icon: User, label: "Profile" },
+    { path: "/home", icon: Home, label: "Главная" },
+    { path: "/players", icon: Users, label: "Игроки" },
+    { path: "/training-checkin", icon: Dumbbell, label: "Тренировки" },
+    { path: "/profile", icon: User, label: "Профиль" },
   ];
 
   return (

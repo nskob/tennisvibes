@@ -61,7 +61,7 @@ export default function Home() {
         <div>
           <h1 className="text-2xl text-app-text mb-2">{user.name}</h1>
           <p className="text-sm text-gray-400">
-            Win/Loss: {user.wins}/{user.losses} · Matches Played: {user.matchesPlayed} · Tournaments: {user.tournamentsPlayed}
+            Побед/Поражений: {user.wins}/{user.losses} · Матчей сыграно: {user.matchesPlayed} · Турниры: {user.tournamentsPlayed}
           </p>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function Home() {
                 result === 'W' ? 'bg-app-success' : 'bg-red-500'
               }`}
             >
-              {result === 'W' ? 'П' : 'П'}
+              {result === 'W' ? 'П' : 'Р'}
             </div>
           ))}
           {form.length === 0 && (

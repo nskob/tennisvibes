@@ -90,13 +90,13 @@ export default function Players() {
 
   return (
     <div className="p-6 pt-12">
-      <h1 className="text-2xl mb-6">Players</h1>
+      <h1 className="text-2xl mb-6">Игроки</h1>
       
       {/* Search */}
       <div className="mb-6">
         <Input
           type="text"
-          placeholder="Search players..."
+          placeholder="Поиск игроков..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full bg-app-secondary text-app-text border-none"
