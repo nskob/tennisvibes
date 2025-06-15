@@ -1,15 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { ArrowLeft, Minus, Plus } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Search } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 
 interface MatchForm {
   opponentId: string;
   date: string;
-  type: string;
   sets: Array<{ p1: number; p2: number }>;
   notes: string;
 }
@@ -21,14 +20,19 @@ export default function MatchRecord() {
   const [form, setForm] = useState<MatchForm>({
     opponentId: "",
     date: new Date().toISOString().split('T')[0],
-    type: "casual",
-    sets: [
-      { p1: 0, p2: 0 },
-      { p1: 0, p2: 0 },
-      { p1: 0, p2: 0 }
-    ],
+    sets: [{ p1: 0, p2: 0 }],
     notes: ""
   });
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Hide suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setShowSuggestions(false);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const { data: users } = useQuery({
     queryKey: ["/api/users"],
@@ -93,7 +97,7 @@ export default function MatchRecord() {
       date: new Date(form.date),
       sets: validSets,
       winner,
-      type: form.type,
+      type: "casual",
       notes: form.notes || undefined,
     };
 
@@ -110,7 +114,22 @@ export default function MatchRecord() {
     }));
   };
 
+  const addSet = () => {
+    setForm(prev => ({
+      ...prev,
+      sets: [...prev.sets, { p1: 0, p2: 0 }]
+    }));
+  };
+
   const opponents = Array.isArray(users) ? users.filter((user: any) => user.id !== 1) : [];
+  
+  const filteredOpponents = opponents.filter((opponent: any) =>
+    opponent.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const selectedOpponent = opponents.find((opponent: any) => 
+    opponent.id.toString() === form.opponentId
+  );
 
   return (
     <div className="px-4 sm:px-6 pt-8 sm:pt-12 pb-24 max-w-md mx-auto">
@@ -126,126 +145,133 @@ export default function MatchRecord() {
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Opponent Selection */}
+        {/* Opponent Selection with Search */}
         <div>
           <label className="block text-sm text-gray-600 mb-3">Соперник</label>
-          <div className="space-y-2">
-            {opponents.map((opponent: any) => (
-              <div 
-                key={opponent.id}
-                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                  form.opponentId === opponent.id.toString() 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => setForm(prev => ({ ...prev, opponentId: opponent.id.toString() }))}
-              >
-                <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
-                <span className="text-sm">{opponent.name}</span>
-                <input
-                  type="radio"
-                  name="opponent"
-                  value={opponent.id}
-                  checked={form.opponentId === opponent.id.toString()}
-                  onChange={() => {}}
-                  className="ml-auto"
-                />
+          <div className="relative">
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder={selectedOpponent ? selectedOpponent.name : "Поиск соперника..."}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            
+            {showSuggestions && searchQuery && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {filteredOpponents.length > 0 ? (
+                  filteredOpponents.map((opponent: any) => (
+                    <div
+                      key={opponent.id}
+                      className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer"
+                      onClick={() => {
+                        setForm(prev => ({ ...prev, opponentId: opponent.id.toString() }));
+                        setSearchQuery("");
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
+                      <span className="text-sm">{opponent.name}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-3 text-sm text-gray-500">Нет результатов</div>
+                )}
               </div>
-            ))}
+            )}
+            
+            {selectedOpponent && (
+              <div className="mt-3 flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <AvatarUpload user={selectedOpponent} size="sm" showUploadButton={false} />
+                <span className="text-sm text-blue-700">{selectedOpponent.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setForm(prev => ({ ...prev, opponentId: "" }))}
+                  className="ml-auto text-blue-500 hover:text-blue-700"
+                >
+                  ×
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Date */}
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Дата</label>
+          <label className="block text-sm text-gray-600 mb-3">Дата</label>
           <input
-            type="date"
-            value={form.date}
-            onChange={(e) => setForm(prev => ({ ...prev, date: e.target.value }))}
-            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+            type="text"
+            value={new Date(form.date).toLocaleDateString('ru-RU', { 
+              day: 'numeric', 
+              month: 'long', 
+              year: 'numeric' 
+            })}
+            onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'date';
+              input.value = form.date;
+              input.onchange = (e) => setForm(prev => ({ ...prev, date: (e.target as HTMLInputElement).value }));
+              input.click();
+            }}
+            readOnly
+            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 cursor-pointer"
           />
-        </div>
-
-        {/* Match Type */}
-        <div>
-          <label className="block text-sm text-gray-600 mb-3">Тип матча</label>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setForm(prev => ({ ...prev, type: 'casual' }))}
-              className={`flex-1 p-3 text-sm rounded-lg border transition-colors ${
-                form.type === 'casual' 
-                  ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              Любительский
-            </button>
-            <button
-              type="button"
-              onClick={() => setForm(prev => ({ ...prev, type: 'tournament' }))}
-              className={`flex-1 p-3 text-sm rounded-lg border transition-colors ${
-                form.type === 'tournament' 
-                  ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              Турнир
-            </button>
-          </div>
         </div>
 
         {/* Sets */}
         <div>
-          <label className="block text-sm text-gray-600 mb-3">Счет по сетам</label>
-          <div className="space-y-3">
+          <label className="block text-sm text-gray-600 mb-4">Счет по сетам</label>
+          <div className="space-y-4">
             {form.sets.map((set, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 w-12">Сет {index + 1}</span>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2">
+              <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-gray-700">Сет {index + 1}</span>
+                </div>
+                <div className="flex items-center justify-center gap-4">
+                  <div className="flex items-center gap-3">
                     <button
                       type="button"
                       onClick={() => updateSet(index, 'p1', Math.max(0, set.p1 - 1).toString())}
-                      className="p-1 rounded-full hover:bg-gray-100"
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
                     >
                       <Minus size={16} />
                     </button>
-                    <input
-                      type="number"
-                      value={set.p1 || ''}
-                      onChange={(e) => updateSet(index, 'p1', e.target.value)}
-                      className="w-12 p-2 text-center border border-gray-200 rounded focus:outline-none focus:border-blue-500"
-                      min="0"
-                    />
+                    <div className="w-16 h-16 flex items-center justify-center bg-white border-2 border-gray-200 rounded-lg">
+                      <span className="text-xl font-bold text-gray-800">{set.p1}</span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => updateSet(index, 'p1', (set.p1 + 1).toString())}
-                      className="p-1 rounded-full hover:bg-gray-100"
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
                     >
                       <Plus size={16} />
                     </button>
                   </div>
-                  <span className="text-gray-400">:</span>
-                  <div className="flex items-center gap-2">
+                  
+                  <span className="text-2xl font-bold text-gray-400">:</span>
+                  
+                  <div className="flex items-center gap-3">
                     <button
                       type="button"
                       onClick={() => updateSet(index, 'p2', Math.max(0, set.p2 - 1).toString())}
-                      className="p-1 rounded-full hover:bg-gray-100"
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
                     >
                       <Minus size={16} />
                     </button>
-                    <input
-                      type="number"
-                      value={set.p2 || ''}
-                      onChange={(e) => updateSet(index, 'p2', e.target.value)}
-                      className="w-12 p-2 text-center border border-gray-200 rounded focus:outline-none focus:border-blue-500"
-                      min="0"
-                    />
+                    <div className="w-16 h-16 flex items-center justify-center bg-white border-2 border-gray-200 rounded-lg">
+                      <span className="text-xl font-bold text-gray-800">{set.p2}</span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => updateSet(index, 'p2', (set.p2 + 1).toString())}
-                      className="p-1 rounded-full hover:bg-gray-100"
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
                     >
                       <Plus size={16} />
                     </button>
@@ -253,6 +279,16 @@ export default function MatchRecord() {
                 </div>
               </div>
             ))}
+            
+            {form.sets.length < 5 && (
+              <button
+                type="button"
+                onClick={addSet}
+                className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-400 hover:text-gray-700 transition-colors"
+              >
+                + Добавить сет
+              </button>
+            )}
           </div>
         </div>
 
