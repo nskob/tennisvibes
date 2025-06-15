@@ -166,17 +166,3 @@
     white-space: nowrap;
   }
 }
-
-/* Date input alignment */
-input[type="date"] {
-  text-align: left !important;
-}
-
-input[type="date"]::-webkit-datetime-edit {
-  text-align: left !important;
-  padding-left: 0 !important;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  margin-left: auto;
-}
