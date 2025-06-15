@@ -1,11 +1,12 @@
 import { 
-  users, matches, training as trainingTable, tournaments, rankings, follows,
+  users, matches, training as trainingTable, tournaments, rankings, follows, coaches,
   type User, type InsertUser,
   type Match, type InsertMatch,
   type Training, type InsertTraining,
   type Tournament, type InsertTournament,
   type Ranking, type InsertRanking,
-  type Follow, type InsertFollow
+  type Follow, type InsertFollow,
+  type Coach, type InsertCoach
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, or, desc, and } from "drizzle-orm";
@@ -40,6 +41,12 @@ export interface IStorage {
   getAllRankings(): Promise<Ranking[]>;
   updateRanking(userId: number, rating: number): Promise<Ranking>;
   
+  // Coaches
+  getCoach(id: number): Promise<Coach | undefined>;
+  getAllCoaches(): Promise<Coach[]>;
+  createCoach(coach: InsertCoach): Promise<Coach>;
+  updateCoach(id: number, updates: Partial<InsertCoach>): Promise<Coach | undefined>;
+  
   // Follows
   getFollowsByUserId(userId: number): Promise<Follow[]>;
   getFollowersByUserId(userId: number): Promise<Follow[]>;
@@ -54,6 +61,7 @@ export class MemStorage implements IStorage {
   private tournaments: Map<number, Tournament> = new Map();
   private rankings: Map<number, Ranking> = new Map();
   private follows: Map<number, Follow> = new Map();
+  private coaches: Map<number, Coach> = new Map();
   
   private currentUserId = 1;
   private currentMatchId = 1;
@@ -61,6 +69,7 @@ export class MemStorage implements IStorage {
   private currentTournamentId = 1;
   private currentRankingId = 1;
   private currentFollowId = 1;
+  private currentCoachId = 1;
 
   constructor() {
     this.seedData();
@@ -207,6 +216,54 @@ export class MemStorage implements IStorage {
       this.training.set(this.currentTrainingId++, {
         id: this.currentTrainingId - 1,
         ...session,
+        createdAt: new Date(),
+      });
+    });
+
+    // Create coaches
+    const coachesData = [
+      {
+        name: "Coach Martinez",
+        specialization: "serve",
+        experience: 15,
+        rating: 5,
+        hourlyRate: 80,
+        bio: "Специалист по подаче с 15-летним опытом работы с профессиональными игроками",
+        avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+        phone: "+7 (925) 123-45-67",
+        email: "martinez@tenniscoach.ru",
+        availability: "Понедельник-Пятница 9:00-18:00",
+      },
+      {
+        name: "Coach Johnson", 
+        specialization: "backhand",
+        experience: 12,
+        rating: 5,
+        hourlyRate: 75,
+        bio: "Эксперт по технике бэкхенда, работал с игроками топ-100",
+        avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+        phone: "+7 (925) 234-56-78",
+        email: "johnson@tenniscoach.ru",
+        availability: "Вторник-Суббота 10:00-19:00",
+      },
+      {
+        name: "Coach Anna",
+        specialization: "mental",
+        experience: 8,
+        rating: 4,
+        hourlyRate: 60,
+        bio: "Спортивный психолог, помогает развивать ментальную устойчивость",
+        avatarUrl: "https://images.unsplash.com/photo-1494790108755-2616c4f5e174?w=150&h=150&fit=crop&crop=face",
+        phone: "+7 (925) 345-67-89",
+        email: "anna@tenniscoach.ru",
+        availability: "Среда-Воскресенье 11:00-20:00",
+      },
+    ];
+
+    coachesData.forEach((coach) => {
+      this.coaches.set(this.currentCoachId++, {
+        id: this.currentCoachId - 1,
+        ...coach,
         createdAt: new Date(),
       });
     });
