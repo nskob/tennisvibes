@@ -238,55 +238,58 @@ export default function MatchRecord() {
         {/* Sets */}
         <div>
           <label className="block text-sm text-gray-600 mb-4">Счет по сетам</label>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {form.sets.map((set, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-lg">
+              <div key={index}>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-700">Сет {index + 1}</span>
+                  <span className="text-sm text-gray-700">Сет {index + 1}</span>
                 </div>
-                <div className="flex items-center justify-center gap-4">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center gap-6">
+                  <div className="flex items-center gap-4">
                     <button
                       type="button"
                       onClick={() => updateSet(index, 'p1', Math.max(0, set.p1 - 1).toString())}
-                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
+                      className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600"
                     >
-                      <Minus size={16} />
+                      <Minus size={20} />
                     </button>
-                    <div className="w-16 h-16 flex items-center justify-center bg-white border-2 border-gray-200 rounded-lg">
-                      <span className="text-xl font-bold text-gray-800">{set.p1}</span>
+                    <div className="w-12 text-center">
+                      <span className="text-2xl font-light text-gray-800">{set.p1}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => updateSet(index, 'p1', (set.p1 + 1).toString())}
-                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
+                      className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600"
                     >
-                      <Plus size={16} />
+                      <Plus size={20} />
                     </button>
                   </div>
                   
-                  <span className="text-2xl font-bold text-gray-400">:</span>
+                  <span className="text-xl text-gray-400">:</span>
                   
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <button
                       type="button"
                       onClick={() => updateSet(index, 'p2', Math.max(0, set.p2 - 1).toString())}
-                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
+                      className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600"
                     >
-                      <Minus size={16} />
+                      <Minus size={20} />
                     </button>
-                    <div className="w-16 h-16 flex items-center justify-center bg-white border-2 border-gray-200 rounded-lg">
-                      <span className="text-xl font-bold text-gray-800">{set.p2}</span>
+                    <div className="w-12 text-center">
+                      <span className="text-2xl font-light text-gray-800">{set.p2}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => updateSet(index, 'p2', (set.p2 + 1).toString())}
-                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
+                      className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600"
                     >
-                      <Plus size={16} />
+                      <Plus size={20} />
                     </button>
                   </div>
                 </div>
+                {index < form.sets.length - 1 && (
+                  <div className="mt-4 border-b border-gray-200"></div>
+                )}
               </div>
             ))}
             
@@ -294,7 +297,7 @@ export default function MatchRecord() {
               <button
                 type="button"
                 onClick={addSet}
-                className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-400 hover:text-gray-700 transition-colors"
+                className="w-full py-4 text-gray-500 hover:text-gray-700 transition-colors border-b-2 border-dashed border-gray-300 hover:border-gray-400"
               >
                 + Добавить сет
               </button>
