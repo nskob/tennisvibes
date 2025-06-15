@@ -46,7 +46,13 @@ export default function MatchRecord() {
   const createMatchMutation = useMutation({
     mutationFn: (matchData: any) => apiRequest("POST", "/api/matches", matchData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      // Invalidate all match-related queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.includes("/api/matches");
+        }
+      });
       toast({
         title: "Успех",
         description: "Матч успешно записан!",
