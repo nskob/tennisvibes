@@ -122,10 +122,10 @@ export default function MatchRecord() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Opponent Selection */}
         <div>
-          <Label className="block text-sm mb-2">Opponent</Label>
+          <Label className="block text-sm mb-2">Соперник</Label>
           <Select value={form.opponentId} onValueChange={(value) => setForm(prev => ({ ...prev, opponentId: value }))}>
             <SelectTrigger className="w-full bg-app-secondary text-app-text border-none">
-              <SelectValue placeholder="Select opponent" />
+              <SelectValue placeholder="Выберите соперника" />
             </SelectTrigger>
             <SelectContent>
               {opponents.map((user: any) => (
@@ -139,7 +139,7 @@ export default function MatchRecord() {
 
         {/* Date */}
         <div>
-          <Label className="block text-sm mb-2">Date</Label>
+          <Label className="block text-sm mb-2">Дата</Label>
           <Input
             type="date"
             value={form.date}
@@ -150,7 +150,7 @@ export default function MatchRecord() {
 
         {/* Match Type */}
         <div>
-          <Label className="block text-sm mb-2">Type</Label>
+          <Label className="block text-sm mb-2">Тип</Label>
           <RadioGroup
             value={form.type}
             onValueChange={(value) => setForm(prev => ({ ...prev, type: value }))}
@@ -158,22 +158,22 @@ export default function MatchRecord() {
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="casual" id="casual" />
-              <Label htmlFor="casual">Casual</Label>
+              <Label htmlFor="casual">Обычный</Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="tournament" id="tournament" />
-              <Label htmlFor="tournament">Tournament</Label>
+              <Label htmlFor="tournament">Турнир</Label>
             </div>
           </RadioGroup>
         </div>
 
         {/* Score */}
         <div>
-          <Label className="block text-sm mb-2">Score</Label>
+          <Label className="block text-sm mb-2">Счет</Label>
           <div className="space-y-3">
             {form.sets.map((set, index) => (
               <div key={index} className="flex items-center space-x-4">
-                <span className="text-sm w-12">Set {index + 1}:</span>
+                <span className="text-sm w-12">Сет {index + 1}:</span>
                 <Input
                   type="number"
                   placeholder="0"

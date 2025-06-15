@@ -54,11 +54,14 @@ export default function League() {
                 club: null,
                 playingStyle: null,
                 racket: null,
-
                 wins: 0,
                 losses: 0,
                 matchesPlayed: 0,
                 tournamentsPlayed: 0,
+                serveProgress: 0,
+                backhandProgress: 0,
+                enduranceProgress: 0,
+                achievements: [],
                 createdAt: null
               }} 
               size="md" 
