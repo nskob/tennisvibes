@@ -169,7 +169,7 @@ export default function MatchRecord() {
               />
             </div>
             
-            {showSuggestions && !selectedOpponent && (
+            {showSuggestions && !selectedOpponent && opponents && (
               <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                 {(searchQuery ? filteredOpponents : opponents).length > 0 ? (
                   (searchQuery ? filteredOpponents : opponents).map((opponent: any) => (
