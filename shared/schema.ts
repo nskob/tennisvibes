@@ -20,9 +20,6 @@ export const users = pgTable("users", {
   backhandProgress: integer("backhand_progress").default(0),
   enduranceProgress: integer("endurance_progress").default(0),
   achievements: text("achievements").array().default([]),
-  telegramId: text("telegram_id").unique(),
-  telegramUsername: text("telegram_username"),
-  telegramPhotoUrl: text("telegram_photo_url"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

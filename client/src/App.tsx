@@ -13,25 +13,25 @@ import Profile from "@/pages/Profile";
 import Tournaments from "@/pages/Tournaments";
 import League from "@/pages/League";
 import Analytics from "@/pages/Analytics";
-import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/login" component={Login} />
-      <Route path="/" component={() => <Layout><Home /></Layout>} />
-      <Route path="/home" component={() => <Layout><Home /></Layout>} />
-      <Route path="/match/new" component={() => <Layout><MatchRecord /></Layout>} />
-      <Route path="/players" component={() => <Layout><Players /></Layout>} />
-      <Route path="/player/:id" component={() => <Layout><PlayerProfile /></Layout>} />
-      <Route path="/training-checkin" component={() => <Layout><Training /></Layout>} />
-      <Route path="/profile" component={() => <Layout><Profile /></Layout>} />
-      <Route path="/tournaments" component={() => <Layout><Tournaments /></Layout>} />
-      <Route path="/analytics" component={() => <Layout><Analytics /></Layout>} />
-      <Route path="/league" component={() => <Layout><League /></Layout>} />
-      <Route component={NotFound} />
-    </Switch>
+    <Layout>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/home" component={Home} />
+        <Route path="/match/new" component={MatchRecord} />
+        <Route path="/players" component={Players} />
+        <Route path="/player/:id" component={PlayerProfile} />
+        <Route path="/training-checkin" component={Training} />
+        <Route path="/profile" component={Profile} />
+        <Route path="/tournaments" component={Tournaments} />
+        <Route path="/analytics" component={Analytics} />
+        <Route path="/league" component={League} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
   );
 }
 

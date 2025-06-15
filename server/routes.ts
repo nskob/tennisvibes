@@ -5,7 +5,6 @@ import { insertUserSchema, insertMatchSchema, insertTrainingSchema, insertTourna
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import crypto from "crypto";
 
 // Configure multer for avatar uploads
 const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
@@ -41,78 +40,9 @@ const upload = multer({
   }
 });
 
-// Telegram authentication helpers
-function verifyTelegramAuth(authData: any, botToken: string): boolean {
-  const { hash, ...data } = authData;
-  const dataCheckString = Object.keys(data)
-    .sort()
-    .map(key => `${key}=${data[key]}`)
-    .join('\n');
-  
-  const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest();
-  const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
-  
-  return calculatedHash === hash;
-}
-
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-
-  // Authentication routes
-  app.post("/api/auth/telegram", async (req, res) => {
-    try {
-      const telegramData = req.body;
-      
-      // In development, skip verification for demo purposes
-      const botToken = process.env.TELEGRAM_BOT_TOKEN;
-      if (botToken && !verifyTelegramAuth(telegramData, botToken)) {
-        return res.status(401).json({ message: "Invalid Telegram authentication" });
-      }
-
-      // Check if user exists by telegram_id
-      let user = await storage.getUserByTelegramId(telegramData.id.toString());
-      
-      if (!user) {
-        // Create new user from Telegram data
-        const newUser = {
-          name: `${telegramData.first_name} ${telegramData.last_name || ''}`.trim(),
-          username: telegramData.username || `user_${telegramData.id}`,
-          password: crypto.randomBytes(32).toString('hex'), // Random password for Telegram users
-          telegramId: telegramData.id.toString(),
-          telegramUsername: telegramData.username,
-          telegramPhotoUrl: telegramData.photo_url,
-          avatarUrl: telegramData.photo_url,
-        };
-        
-        user = await storage.createUser(newUser);
-      } else {
-        // Update user's Telegram data
-        user = await storage.updateUser(user.id, {
-          telegramPhotoUrl: telegramData.photo_url,
-          avatarUrl: telegramData.photo_url,
-        });
-      }
-      
-      res.json(user);
-    } catch (error) {
-      console.error('Telegram auth error:', error);
-      res.status(500).json({ message: "Authentication failed" });
-    }
-  });
-
-  app.post("/api/auth/demo", async (req, res) => {
-    try {
-      // Demo login - return the main user
-      const user = await storage.getUser(1);
-      if (!user) {
-        return res.status(404).json({ message: "Demo user not found" });
-      }
-      res.json(user);
-    } catch (error) {
-      res.status(500).json({ message: "Demo login failed" });
-    }
-  });
 
   // Users
   app.get("/api/users", async (req, res) => {
