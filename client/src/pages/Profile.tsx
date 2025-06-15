@@ -82,48 +82,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Skill Progress */}
-      <div className="mb-8">
-        <h2 className="text-lg mb-4">Skills</h2>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Serve</span>
-              <span className="text-gray-400">{(user.serveProgress / 10).toFixed(1)}/10</span>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill bg-app-primary"
-                style={{ width: `${user.serveProgress}%` }}
-              ></div>
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Backhand</span>
-              <span className="text-gray-400">{(user.backhandProgress / 10).toFixed(1)}/10</span>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill bg-app-success"
-                style={{ width: `${user.backhandProgress}%` }}
-              ></div>
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Endurance</span>
-              <span className="text-gray-400">{(user.enduranceProgress / 10).toFixed(1)}/10</span>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill bg-orange-400"
-                style={{ width: `${user.enduranceProgress}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       {/* Player Info */}
       <div className="space-y-3 mb-8">

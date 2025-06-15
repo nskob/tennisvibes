@@ -68,7 +68,7 @@ export default function Home() {
 
       {/* Recent Matches */}
       <div className="mb-8">
-        <h2 className="text-lg mb-4">Recent Matches</h2>
+        <h2 className="text-lg mb-4">Последние матчи</h2>
         {matchesLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
@@ -98,7 +98,7 @@ export default function Home() {
 
       {/* Form Streak */}
       <div className="mb-8">
-        <h2 className="text-lg mb-4">Recent Form</h2>
+        <h2 className="text-lg mb-4">Последняя форма</h2>
         <div className="flex space-x-3">
           {form.map((result, index) => (
             <div
@@ -107,58 +107,20 @@ export default function Home() {
                 result === 'W' ? 'bg-app-success' : 'bg-red-500'
               }`}
             >
-              {result}
+              {result === 'W' ? 'П' : 'П'}
             </div>
           ))}
+          {form.length === 0 && (
+            <div className="text-gray-400 text-sm">Нет последних матчей</div>
+          )}
         </div>
       </div>
 
-      {/* Training Progress */}
-      <div className="mb-8">
-        <h2 className="text-lg mb-4">Training Progress</h2>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Serve Accuracy</span>
-              <span className="text-gray-400">{user.serveProgress}% / 85%</span>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill bg-app-primary"
-                style={{ width: `${user.serveProgress}%` }}
-              ></div>
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Backhand Power</span>
-              <span className="text-gray-400">{user.backhandProgress}% / 90%</span>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill bg-app-success"
-                style={{ width: `${user.backhandProgress}%` }}
-              ></div>
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Endurance</span>
-              <span className="text-gray-400">{user.enduranceProgress}% / 80%</span>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill bg-orange-400"
-                style={{ width: `${user.enduranceProgress}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       {/* Recent Training */}
       <div className="mb-8">
-        <h2 className="text-lg mb-4">Recent Training</h2>
+        <h2 className="text-lg mb-4">Последние тренировки</h2>
         {trainingLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
@@ -170,16 +132,24 @@ export default function Home() {
         ) : (
           <div className="space-y-3">
             {recentTraining.map((session: any) => (
-              <div key={session.id} className="flex justify-between text-sm">
-                <span className="capitalize">
-                  {session.type === 'serve' ? 'Serve Practice' : 
-                   session.type === 'backhand' ? 'Backhand Drills' :
-                   session.type === 'physical' ? 'Physical Training' :
-                   session.type === 'match' ? 'Match Play' : session.type}
-                </span>
-                <span className="text-gray-400">{Math.floor(session.duration / 60)}h{session.duration % 60 > 0 ? ` ${session.duration % 60}m` : ''}</span>
+              <div key={session.id} className="text-sm">
+                <div className="flex justify-between">
+                  <span className="text-app-text">
+                    Тренер: {session.coach}
+                  </span>
+                  <span className="text-gray-400">{formatDate(session.date)}</span>
+                </div>
+                <div className="text-gray-400 text-xs mt-1">
+                  {session.type === 'technique' ? 'Техника' : 
+                   session.type === 'fitness' ? 'Физическая подготовка' :
+                   session.type === 'match' ? 'Игровая практика' : 
+                   session.type}
+                </div>
               </div>
             ))}
+            {recentTraining.length === 0 && (
+              <div className="text-gray-400 text-sm">Нет записей о тренировках</div>
+            )}
           </div>
         )}
       </div>
