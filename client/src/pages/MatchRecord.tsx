@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { ArrowLeft, Minus, Plus, Search } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Search, Trash2 } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 
 interface MatchForm {
@@ -126,6 +126,15 @@ export default function MatchRecord() {
     }));
   };
 
+  const removeSet = (index: number) => {
+    if (form.sets.length > 1) {
+      setForm(prev => ({
+        ...prev,
+        sets: prev.sets.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   const opponents = Array.isArray(users) ? users.filter((user: any) => user.id !== 1) : [];
   
   const filteredOpponents = opponents.filter((opponent: any) =>
@@ -243,6 +252,15 @@ export default function MatchRecord() {
               <div key={index}>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm text-gray-700">Сет {index + 1}</span>
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => removeSet(index)}
+                      className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
                 <div className="flex items-center justify-center gap-6">
                   <div className="flex items-center gap-4">
