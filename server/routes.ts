@@ -1,9 +1,49 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertMatchSchema, insertTrainingSchema, insertTournamentSchema } from "@shared/schema";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Configure multer for avatar uploads
+const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage_multer = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage_multer,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve uploaded files
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
   // Users
   app.get("/api/users", async (req, res) => {
     const users = await storage.getAllUsers();
@@ -30,6 +70,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       res.status(400).json({ message: "Invalid data", error });
+    }
+  });
+
+  // Avatar upload endpoint
+  app.post("/api/users/:id/avatar", upload.single('avatar'), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Delete old avatar if exists
+      if (user.avatarUrl) {
+        const oldAvatarPath = path.join(process.cwd(), user.avatarUrl);
+        if (fs.existsSync(oldAvatarPath)) {
+          fs.unlinkSync(oldAvatarPath);
+        }
+      }
+
+      // Update user with new avatar URL
+      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+      const updatedUser = await storage.updateUser(userId, { avatarUrl });
+
+      res.json({
+        message: "Avatar uploaded successfully",
+        user: updatedUser,
+        avatarUrl
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to upload avatar", error });
     }
   });
 
