@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { User } from "@shared/schema";
+import AvatarUpload from "@/components/AvatarUpload";
 
 export default function Home() {
   const { data: user, isLoading } = useQuery<User>({
@@ -55,11 +56,14 @@ export default function Home() {
   return (
     <div className="p-6 pt-12">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl text-app-text mb-2">{user.name}</h1>
-        <p className="text-sm text-gray-400">
-          Win/Loss: {user.wins}/{user.losses} · Matches Played: {user.matchesPlayed} · Tournaments: {user.tournamentsPlayed}
-        </p>
+      <div className="mb-8 flex items-center gap-4">
+        <AvatarUpload user={user} size="md" showUploadButton={false} />
+        <div>
+          <h1 className="text-2xl text-app-text mb-2">{user.name}</h1>
+          <p className="text-sm text-gray-400">
+            Win/Loss: {user.wins}/{user.losses} · Matches Played: {user.matchesPlayed} · Tournaments: {user.tournamentsPlayed}
+          </p>
+        </div>
       </div>
 
       {/* Recent Matches */}

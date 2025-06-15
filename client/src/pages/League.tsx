@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "wouter";
+import AvatarUpload from "@/components/AvatarUpload";
 
 export default function League() {
   const { data: rankings, isLoading } = useQuery({
@@ -43,12 +43,15 @@ export default function League() {
             <div className="w-8 text-center font-medium">
               {index + 1}
             </div>
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={ranking.userAvatar} alt={ranking.userName} />
-              <AvatarFallback className="bg-app-bg text-app-text">
-                {getInitials(ranking.userName)}
-              </AvatarFallback>
-            </Avatar>
+            <AvatarUpload 
+              user={{ 
+                id: ranking.userId, 
+                name: ranking.userName, 
+                avatarUrl: ranking.userAvatar 
+              }} 
+              size="md" 
+              showUploadButton={false} 
+            />
             <div className="flex-1">
               <div className="font-medium">{ranking.userName || 'Unknown Player'}</div>
               <div className="text-sm text-gray-400">{ranking.rating} pts</div>
