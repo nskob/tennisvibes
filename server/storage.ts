@@ -504,6 +504,47 @@ export class MemStorage implements IStorage {
     }
     return false;
   }
+
+  // Coaches
+  async getCoach(id: number): Promise<Coach | undefined> {
+    return this.coaches.get(id);
+  }
+
+  async getAllCoaches(): Promise<Coach[]> {
+    return Array.from(this.coaches.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async createCoach(insertCoach: InsertCoach): Promise<Coach> {
+    const id = this.currentCoachId++;
+    const coach: Coach = {
+      id,
+      name: insertCoach.name,
+      specialization: insertCoach.specialization || null,
+      experience: insertCoach.experience || null,
+      rating: insertCoach.rating || null,
+      hourlyRate: insertCoach.hourlyRate || null,
+      bio: insertCoach.bio || null,
+      avatarUrl: insertCoach.avatarUrl || null,
+      phone: insertCoach.phone || null,
+      email: insertCoach.email || null,
+      availability: insertCoach.availability || null,
+      createdAt: new Date(),
+    };
+    this.coaches.set(id, coach);
+    return coach;
+  }
+
+  async updateCoach(id: number, updates: Partial<InsertCoach>): Promise<Coach | undefined> {
+    const coach = this.coaches.get(id);
+    if (!coach) return undefined;
+    
+    const updatedCoach: Coach = {
+      ...coach,
+      ...updates,
+    };
+    this.coaches.set(id, updatedCoach);
+    return updatedCoach;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -694,6 +735,33 @@ export class DatabaseStorage implements IStorage {
         and(eq(follows.followerId, followerId), eq(follows.followingId, followingId))
       );
     return (result.rowCount || 0) > 0;
+  }
+
+  // Coaches
+  async getCoach(id: number): Promise<Coach | undefined> {
+    const [coach] = await db.select().from(coaches).where(eq(coaches.id, id));
+    return coach || undefined;
+  }
+
+  async getAllCoaches(): Promise<Coach[]> {
+    return await db.select().from(coaches).orderBy(coaches.name);
+  }
+
+  async createCoach(insertCoach: InsertCoach): Promise<Coach> {
+    const [coach] = await db
+      .insert(coaches)
+      .values(insertCoach)
+      .returning();
+    return coach;
+  }
+
+  async updateCoach(id: number, updates: Partial<InsertCoach>): Promise<Coach | undefined> {
+    const [coach] = await db
+      .update(coaches)
+      .set(updates)
+      .where(eq(coaches.id, id))
+      .returning();
+    return coach || undefined;
   }
 }
 

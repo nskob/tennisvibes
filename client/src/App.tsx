@@ -13,6 +13,7 @@ import Profile from "@/pages/Profile";
 import Tournaments from "@/pages/Tournaments";
 import League from "@/pages/League";
 import Analytics from "@/pages/Analytics";
+import Coaches from "@/pages/Coaches";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/tournaments" component={Tournaments} />
         <Route path="/analytics" component={Analytics} />
         <Route path="/league" component={League} />
+        <Route path="/coaches" component={Coaches} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

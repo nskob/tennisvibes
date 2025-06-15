@@ -1,7 +1,7 @@
 import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertMatchSchema, insertTrainingSchema, insertTournamentSchema } from "@shared/schema";
+import { insertUserSchema, insertMatchSchema, insertTrainingSchema, insertTournamentSchema, insertCoachSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -226,6 +226,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Unfollowed successfully" });
     } else {
       res.status(404).json({ message: "Follow relationship not found" });
+    }
+  });
+
+  // Coaches
+  app.get("/api/coaches", async (req, res) => {
+    const coaches = await storage.getAllCoaches();
+    res.json(coaches);
+  });
+
+  app.get("/api/coaches/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const coach = await storage.getCoach(id);
+    
+    if (coach) {
+      res.json(coach);
+    } else {
+      res.status(404).json({ message: "Coach not found" });
+    }
+  });
+
+  app.post("/api/coaches", async (req, res) => {
+    try {
+      const validatedData = insertCoachSchema.parse(req.body);
+      const coach = await storage.createCoach(validatedData);
+      res.json(coach);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid coach data", error });
+    }
+  });
+
+  app.patch("/api/coaches/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const coach = await storage.updateCoach(id, updates);
+      
+      if (coach) {
+        res.json(coach);
+      } else {
+        res.status(404).json({ message: "Coach not found" });
+      }
+    } catch (error) {
+      res.status(400).json({ message: "Invalid update data", error });
+    }
+  });
+
+  // Coach avatar upload
+  app.post("/api/coaches/:id/avatar", upload.single('avatar'), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+      const coach = await storage.updateCoach(id, { avatarUrl });
+      
+      if (coach) {
+        res.json({ avatarUrl });
+      } else {
+        res.status(404).json({ message: "Coach not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Avatar upload failed", error });
     }
   });
 
