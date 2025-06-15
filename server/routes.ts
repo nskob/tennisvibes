@@ -127,6 +127,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       })
     );
     
+    // Sort by creation date descending (newest first)
+    enrichedMatches.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.date).getTime();
+      const dateB = new Date(b.createdAt || b.date).getTime();
+      return dateB - dateA;
+    });
+    
     res.json(enrichedMatches);
   });
 

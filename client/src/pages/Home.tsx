@@ -36,6 +36,13 @@ export default function Home() {
 
   if (!user) return null;
 
+  // Debug logging
+  console.log('Matches data:', matches);
+  console.log('Matches length:', Array.isArray(matches) ? matches.length : 'not array');
+  if (Array.isArray(matches) && matches.length > 0) {
+    console.log('First 3 matches:', matches.slice(0, 3).map(m => ({ id: m.id, createdAt: m.createdAt })));
+  }
+
   const recentMatches = Array.isArray(matches) ? matches.slice(0, 3) : [];
   const recentTraining = Array.isArray(training) ? training.slice(0, 3) : [];
 
