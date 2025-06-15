@@ -155,7 +155,7 @@ export default function MatchRecord() {
           <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Соперник</h3>
           <div className="relative">
             {selectedOpponent ? (
-              <div className="flex items-center justify-between py-3 px-4 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between py-3 px-4 rounded-lg border" style={{ borderColor: 'var(--app-border)', backgroundColor: 'var(--app-secondary)' }}>
                 <div className="flex items-center gap-3">
                   <AvatarUpload user={selectedOpponent} size="sm" showUploadButton={false} />
                   <span className="text-sm">{selectedOpponent.name}</span>
@@ -179,17 +179,21 @@ export default function MatchRecord() {
                     setShowSuggestions(true);
                   }}
                   onFocus={() => setShowSuggestions(true)}
-                  className="w-full py-3 px-4 border border-gray-200 rounded-lg"
+                  className="w-full py-3 px-4 border rounded-lg"
+                  style={{ borderColor: 'var(--app-border)', backgroundColor: 'var(--app-secondary)', color: 'var(--app-text)' }}
                 />
                 {showSuggestions && opponentSearch && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 border rounded-lg shadow-lg max-h-48 overflow-y-auto" style={{ backgroundColor: 'var(--app-bg)', borderColor: 'var(--app-border)' }}>
                     {filteredOpponents.length > 0 ? (
                       filteredOpponents.map((opponent: any) => (
                         <button
                           key={opponent.id}
                           type="button"
                           onClick={() => selectOpponent(opponent)}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
+                          style={{ color: 'var(--app-text)' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--app-secondary)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
                           <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
                           <span className="text-sm">{opponent.name}</span>
@@ -214,7 +218,8 @@ export default function MatchRecord() {
             type="date"
             value={form.date}
             onChange={(e) => setForm(prev => ({ ...prev, date: e.target.value }))}
-            className="w-full py-3 px-4 border border-gray-200 rounded-lg"
+            className="w-full py-3 px-4 border rounded-lg"
+            style={{ borderColor: 'var(--app-border)', backgroundColor: 'var(--app-secondary)', color: 'var(--app-text)' }}
           />
         </div>
 
@@ -242,7 +247,8 @@ export default function MatchRecord() {
                   max="99"
                   value={set.p1 || ""}
                   onChange={(e) => updateSet(index, 'p1', e.target.value)}
-                  className="w-16 text-center border border-gray-200 rounded py-2"
+                  className="w-16 text-center border rounded py-2"
+                  style={{ borderColor: 'var(--app-border)', backgroundColor: 'var(--app-secondary)', color: 'var(--app-text)' }}
                 />
                 <span className="text-gray-400">-</span>
                 <Input
