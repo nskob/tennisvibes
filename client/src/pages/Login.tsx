@@ -160,23 +160,14 @@ export default function Login() {
         // Check immediately if there's already a Telegram user authenticated
         fetch('/api/auth/telegram/latest').then(res => res.json()).then(result => {
           if (result.success && result.user) {
-            // Fetch the most up-to-date user data
-            fetch(`/api/users/${result.user.id}`).then(userRes => userRes.json()).then(updatedUser => {
-              localStorage.setItem("user", JSON.stringify(updatedUser));
-              toast({
-                title: "Успешный вход",
-                description: `Добро пожаловать, ${updatedUser.name}!`,
-              });
-              setLocation("/home");
-            }).catch(() => {
-              // Fallback to original user data
-              localStorage.setItem("user", JSON.stringify(result.user));
-              toast({
-                title: "Успешный вход",
-                description: `Добро пожаловать, ${result.user.name}!`,
-              });
-              setLocation("/home");
+            // Save user data to localStorage and redirect
+            localStorage.setItem("user", JSON.stringify(result.user));
+            toast({
+              title: "Успешный вход",
+              description: `Добро пожаловать, ${result.user.name}!`,
             });
+            // Force page refresh to clear any cached data
+            window.location.href = "/home";
           }
         });
 

@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Layout from "@/components/Layout";
+import UserSessionInit from "@/components/UserSessionInit";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import MatchRecord from "@/pages/MatchRecord";
