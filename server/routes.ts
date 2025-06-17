@@ -471,6 +471,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update Telegram user profile with complete information
+  app.post("/api/auth/telegram/update-profile", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.telegramId) {
+        return res.status(404).json({ success: false, error: 'Telegram user not found' });
+      }
+
+      // Get user info from Telegram API
+      const telegramResponse = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getChat?chat_id=${user.telegramId}`);
+      const telegramData = await telegramResponse.json();
+
+      if (telegramData.ok) {
+        const telegramUser = telegramData.result;
+        
+        // Get profile photos
+        const photosResponse = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getUserProfilePhotos?user_id=${user.telegramId}&limit=1`);
+        const photosData = await photosResponse.json();
+        
+        let photoUrl = null;
+        if (photosData.ok && photosData.result.total_count > 0) {
+          const fileId = photosData.result.photos[0][1].file_id; // Medium size photo
+          const fileResponse = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getFile?file_id=${fileId}`);
+          const fileData = await fileResponse.json();
+          
+          if (fileData.ok) {
+            photoUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${fileData.result.file_path}`;
+          }
+        }
+
+        // Update user with Telegram information
+        const updates: any = {
+          name: `${telegramUser.first_name || ''}${telegramUser.last_name ? ' ' + telegramUser.last_name : ''}`.trim() || user.name,
+          telegramUsername: telegramUser.username,
+          telegramFirstName: telegramUser.first_name,
+          telegramLastName: telegramUser.last_name,
+        };
+
+        if (photoUrl) {
+          updates.avatarUrl = photoUrl;
+          updates.telegramPhotoUrl = photoUrl;
+        }
+
+        const updatedUser = await storage.updateUser(userId, updates);
+        
+        res.json({
+          success: true,
+          user: updatedUser
+        });
+      } else {
+        res.status(400).json({ success: false, error: 'Failed to get Telegram user data' });
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      res.status(500).json({ success: false, error: 'Failed to update profile' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
