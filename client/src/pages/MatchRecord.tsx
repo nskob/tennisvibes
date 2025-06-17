@@ -58,14 +58,25 @@ export default function MatchRecord() {
 
   const createMatchMutation = useMutation({
     mutationFn: (matchData: any) => apiRequest("POST", "/api/matches", matchData),
-    onSuccess: () => {
-      // Invalidate all match-related queries
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const key = query.queryKey[0] as string;
-          return key?.includes("/api/matches");
+    onSuccess: async () => {
+      // Invalidate specific user data and match queries
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${currentUserId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/matches/user/${currentUserId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      
+      // Update localStorage with fresh user data
+      try {
+        const response = await fetch(`/api/users/${currentUserId}`);
+        if (response.ok) {
+          const updatedUser = await response.json();
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          // Trigger custom event to notify other components
+          window.dispatchEvent(new Event('userDataUpdated'));
         }
-      });
+      } catch (error) {
+        console.log("Failed to update user data in localStorage");
+      }
+      
       toast({
         title: "Успех",
         description: "Матч успешно записан!",

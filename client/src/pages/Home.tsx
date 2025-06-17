@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import AvatarUpload from "@/components/AvatarUpload";
 import { useLocation } from "wouter";
@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 export default function Home() {
   const [, setLocation] = useLocation();
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const queryClient = useQueryClient();
   
   // Get current user from localStorage
   useEffect(() => {
@@ -22,6 +23,31 @@ export default function Home() {
       setCurrentUserId(13);
     }
   }, []);
+
+  // Listen for localStorage changes (when user data is updated)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        if (user.id !== currentUserId) {
+          setCurrentUserId(user.id);
+        }
+        // Refetch user data when localStorage changes
+        queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}`] });
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events when localStorage is updated from same tab
+    window.addEventListener('userDataUpdated', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userDataUpdated', handleStorageChange);
+    };
+  }, [currentUserId, queryClient]);
   
   const { data: user, isLoading } = useQuery<User>({
     queryKey: [`/api/users/${currentUserId}`],
