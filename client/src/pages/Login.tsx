@@ -51,7 +51,7 @@ export default function Login() {
       }
     };
 
-    // Load Telegram Widget
+    // Load Telegram Widget using iframe approach
     const loadTelegramWidget = () => {
       const telegramContainer = document.getElementById("telegram-login-container");
       if (!telegramContainer) {
@@ -59,22 +59,10 @@ export default function Login() {
         return;
       }
 
-      // Clear existing content
-      telegramContainer.innerHTML = '';
-
-      // Direct HTML insertion for Telegram Login Widget
-      telegramContainer.innerHTML = `
-        <script 
-          async 
-          src="https://telegram.org/js/telegram-widget.js?22"
-          data-telegram-login="sport_vibes_bot"
-          data-size="large"
-          data-onauth="onTelegramAuth(user)"
-          data-request-access="write">
-        </script>
-      `;
-
-      // Also try dynamic script method as fallback
+      // Clear existing content except loading text
+      const loadingText = telegramContainer.innerHTML;
+      
+      // Try direct script method first
       const script = document.createElement("script");
       script.src = "https://telegram.org/js/telegram-widget.js?22";
       script.setAttribute("data-telegram-login", "sport_vibes_bot");
@@ -83,15 +71,49 @@ export default function Login() {
       script.setAttribute("data-request-access", "write");
       script.async = true;
       
-      script.onload = () => {
-        console.log("Telegram widget script loaded successfully");
-      };
+      // Clear container and add script
+      telegramContainer.innerHTML = '';
+      telegramContainer.appendChild(script);
       
-      script.onerror = (error) => {
-        console.error("Failed to load Telegram widget script:", error);
-      };
+      // Check if widget renders after delay and show iframe if script fails
+      setTimeout(() => {
+        const hasWidget = telegramContainer.querySelector('iframe');
+        if (!hasWidget) {
+          console.log("Script method failed, showing iframe");
+          telegramContainer.innerHTML = '';
+          
+          const iframe = document.createElement("iframe");
+          iframe.src = `https://oauth.telegram.org/embed/sport_vibes_bot?origin=${encodeURIComponent(window.location.origin)}&size=large&request_access=write`;
+          iframe.width = "238";
+          iframe.height = "40";
+          iframe.frameBorder = "0";
+          iframe.scrolling = "no";
+          iframe.style.border = "1px solid #e5e7eb";
+          iframe.style.borderRadius = "8px";
+          iframe.style.margin = "0 auto";
+          iframe.style.display = "block";
+          iframe.style.backgroundColor = "white";
+          
+          iframe.onload = () => {
+            console.log("Fallback iframe loaded");
+          };
+          
+          telegramContainer.appendChild(iframe);
+        }
+      }, 1000);
 
-      document.head.appendChild(script);
+      // Listen for messages from the iframe
+      window.addEventListener('message', (event) => {
+        if (event.origin !== 'https://oauth.telegram.org') {
+          return;
+        }
+        
+        console.log("Received message from Telegram iframe:", event.data);
+        
+        if (event.data && event.data.user) {
+          window.onTelegramAuth(event.data.user);
+        }
+      });
     };
 
     // Load widget after a short delay to ensure DOM is ready
@@ -121,7 +143,7 @@ export default function Login() {
             {/* Telegram Login Widget Container */}
             <div 
               id="telegram-login-container" 
-              className="flex justify-center min-h-[50px] items-center"
+              className="flex justify-center min-h-[50px] items-center border border-gray-200 rounded-lg p-4 bg-gray-50"
             >
               <div className="text-sm text-gray-400">Загрузка виджета Telegram...</div>
             </div>

@@ -6,6 +6,19 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Set CSP headers to allow Telegram widgets
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', 
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org; " +
+    "frame-src 'self' https://oauth.telegram.org; " +
+    "connect-src 'self' https://api.telegram.org; " +
+    "img-src 'self' data: https:; " +
+    "style-src 'self' 'unsafe-inline'"
+  );
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
