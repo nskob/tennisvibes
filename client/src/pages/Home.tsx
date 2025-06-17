@@ -24,17 +24,17 @@ export default function Home() {
   }, []);
   
   const { data: user, isLoading } = useQuery<User>({
-    queryKey: ["/api/users", currentUserId],
+    queryKey: [`/api/users/${currentUserId}`],
     enabled: !!currentUserId, // Only run query when we have a user ID
   });
 
   const { data: matches, isLoading: matchesLoading } = useQuery({
-    queryKey: ["/api/matches/user", currentUserId],
+    queryKey: [`/api/matches/user/${currentUserId}`],
     enabled: !!currentUserId,
   });
 
   const { data: training, isLoading: trainingLoading } = useQuery({
-    queryKey: ["/api/training/user", currentUserId],
+    queryKey: [`/api/training/user/${currentUserId}`],
     enabled: !!currentUserId,
   });
 
@@ -67,9 +67,7 @@ export default function Home() {
     );
   }
 
-  console.log("User data:", user);
-  console.log("Current user ID:", currentUserId);
-  console.log("User name:", user?.name);
+
 
   const recentMatches = Array.isArray(matches) ? matches.slice(0, 3) : [];
   const recentTraining = Array.isArray(training) ? training.slice(0, 3) : [];

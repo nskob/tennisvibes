@@ -9,7 +9,7 @@ export default function UserSessionInit() {
         if (response.ok) {
           const userData = await response.json();
           localStorage.setItem("user", JSON.stringify(userData));
-          console.log("User session initialized:", userData);
+
         }
       } catch (error) {
         console.error("Failed to initialize user session:", error);
@@ -22,7 +22,6 @@ export default function UserSessionInit() {
       initializeUserSession();
     } else {
       const parsedUser = JSON.parse(currentUser);
-      console.log("Current user in localStorage:", parsedUser);
       
       // Ensure we have Nikita Skob's data
       if (parsedUser.id !== 13) {
