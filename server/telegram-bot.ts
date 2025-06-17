@@ -29,6 +29,9 @@ interface TelegramUpdate {
 }
 
 export class TelegramBot {
+  private lastUpdateId: number = 0;
+  private pollingInterval: NodeJS.Timeout | null = null;
+
   private async sendMessage(chatId: number, text: string, replyMarkup?: any) {
     const response = await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
       method: 'POST',
@@ -48,6 +51,42 @@ export class TelegramBot {
     }
 
     return response.json();
+  }
+
+  private async getUpdates() {
+    try {
+      const response = await fetch(`${TELEGRAM_API_URL}/getUpdates?offset=${this.lastUpdateId + 1}&timeout=10`);
+      if (!response.ok) {
+        throw new Error(`Failed to get updates: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.ok && data.result.length > 0) {
+        for (const update of data.result) {
+          this.lastUpdateId = update.update_id;
+          await this.handleUpdate(update);
+        }
+      }
+    } catch (error) {
+      console.error('Error getting updates:', error);
+    }
+  }
+
+  startPolling() {
+    if (this.pollingInterval) return;
+    
+    console.log('Starting Telegram bot polling...');
+    this.pollingInterval = setInterval(() => {
+      this.getUpdates();
+    }, 2000);
+  }
+
+  stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+      console.log('Stopped Telegram bot polling');
+    }
   }
 
   private generateAuthToken(userId: number): string {
@@ -88,60 +127,65 @@ export class TelegramBot {
     const text = message.text;
     const user = message.from;
 
+    console.log(`Received message from ${user.first_name}: ${text}`);
+
     try {
-      if (text === '/start') {
-        const welcomeText = `
-Добро пожаловать в Теннис Трекер! 🎾
-
-Этот бот поможет вам войти в веб-приложение для отслеживания теннисных матчей и тренировок.
-
-Чтобы войти в приложение, нажмите кнопку ниже:
-        `;
-
-        const keyboard = {
-          inline_keyboard: [[
-            {
-              text: '🌐 Открыть приложение',
-              web_app: { url: 'https://workspace.skobnikita.repl.co' }
-            }
-          ]]
-        };
-
-        await this.sendMessage(chatId, welcomeText, keyboard);
-      } else if (text?.startsWith('/start web_auth_')) {
-        // Handle web authentication
+      if (text === '/start' || text?.startsWith('/start web_auth_')) {
+        // Handle authentication for any /start command
         const webAppUser = await this.createWebAppUser(user);
-        const authToken = this.generateAuthToken(webAppUser.id);
+        
+        const authText = `Добро пожаловать в Теннис Трекер! 🎾
 
-        const authText = `
-Аутентификация успешна! ✅
+Аутентификация успешна!
 
 Имя: ${webAppUser.name}
 ID: ${webAppUser.id}
+Username: @${webAppUser.username}
 
-Теперь вы можете вернуться в веб-приложение и обновить страницу.
-        `;
+Теперь вернитесь в веб-приложение - вы автоматически войдете в систему.`;
 
         const keyboard = {
           inline_keyboard: [[
             {
               text: '🌐 Открыть приложение',
-              web_app: { url: 'https://workspace.skobnikita.repl.co/login' }
+              url: 'https://workspace.skobnikita.repl.co'
             }
           ]]
         };
 
         await this.sendMessage(chatId, authText, keyboard);
 
-        // Store auth token temporarily (in a real app, use Redis or similar)
-        console.log(`Auth token for user ${webAppUser.id}: ${authToken}`);
+        // Store the successful authentication in a way the web app can access
+        // For now, we'll create a simple auth endpoint
+        console.log(`User ${webAppUser.id} (${webAppUser.name}) authenticated via Telegram`);
+        
+        // Simulate successful telegram auth by creating auth data
+        const mockAuthData = {
+          id: user.id.toString(),
+          first_name: user.first_name,
+          last_name: user.last_name,
+          username: user.username,
+          photo_url: '',
+          auth_date: Math.floor(Date.now() / 1000).toString(),
+          hash: 'mock_hash_for_bot_auth'
+        };
+
+        // This would normally be handled by the Login Widget, but since we're using bot auth
+        // we need to provide an alternative way for the user to complete login
+        (global as any).pendingTelegramAuth = (global as any).pendingTelegramAuth || {};
+        (global as any).pendingTelegramAuth[user.id] = {
+          authData: mockAuthData,
+          user: webAppUser,
+          timestamp: Date.now()
+        };
+
       } else {
         // Default response
-        await this.sendMessage(chatId, 'Используйте /start для начала работы с ботом.');
+        await this.sendMessage(chatId, 'Отправьте /start для входа в приложение.');
       }
     } catch (error) {
       console.error('Error handling Telegram update:', error);
-      await this.sendMessage(chatId, 'Произошла ошибка. Попробуйте позже.');
+      await this.sendMessage(chatId, 'Произошла ошибка. Попробуйте /start снова.');
     }
   }
 

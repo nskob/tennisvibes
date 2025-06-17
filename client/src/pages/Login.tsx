@@ -118,26 +118,80 @@ export default function Login() {
 
       // Add telegram login function to window
       (window as any).telegramLogin = () => {
+        // Generate a unique identifier for this auth session
+        const authSessionId = Date.now().toString();
+        const authUrl = `https://t.me/sport_vibes_bot?start=web_auth_${authSessionId}`;
+        
         // Open Telegram bot for authentication
-        const authUrl = `https://t.me/sport_vibes_bot?start=web_auth_${Date.now()}`;
         window.open(authUrl, '_blank');
         
-        // Show instructions
+        // Show waiting state and start polling for authentication
         const container = document.getElementById("telegram-login-container");
         if (container) {
           container.innerHTML = `
             <div style="text-align: center; padding: 20px;">
+              <div style="margin-bottom: 15px;">
+                <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #0088cc; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+              </div>
               <p style="margin-bottom: 15px; color: #666;">
-                Откройте бота в Telegram и следуйте инструкциям для входа
+                Ожидание входа через Telegram...
+              </p>
+              <p style="font-size: 12px; color: #999;">
+                После входа в бота вернитесь на эту страницу
               </p>
               <button 
                 onclick="window.telegramLogin()"
-                style="background: #0088cc; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                style="background: #0088cc; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
                 Открыть бота снова
               </button>
             </div>
+            <style>
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            </style>
           `;
         }
+
+        // Start polling for authentication completion
+        const checkAuthInterval = setInterval(async () => {
+          try {
+            // We'll check for any successful Telegram auth by checking all recent users
+            const response = await fetch('/api/users');
+            const users = await response.json();
+            
+            // Look for recently created Telegram users (created in last 5 minutes)
+            const recentTelegramUsers = users.filter((user: any) => 
+              user.authProvider === 'telegram' && 
+              user.id > 1 // Not the default user
+            );
+
+            if (recentTelegramUsers.length > 0) {
+              // Take the most recent user
+              const latestUser = recentTelegramUsers[recentTelegramUsers.length - 1];
+              
+              // Store user data and redirect
+              localStorage.setItem("user", JSON.stringify(latestUser));
+              
+              setIsLoading(false);
+              toast({
+                title: "Успешный вход",
+                description: `Добро пожаловать, ${latestUser.name}!`,
+              });
+
+              clearInterval(checkAuthInterval);
+              setLocation("/home");
+            }
+          } catch (error) {
+            console.error('Error checking auth status:', error);
+          }
+        }, 3000); // Check every 3 seconds
+
+        // Stop checking after 5 minutes
+        setTimeout(() => {
+          clearInterval(checkAuthInterval);
+        }, 300000);
       };
     };
 

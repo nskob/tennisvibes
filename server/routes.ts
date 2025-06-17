@@ -421,6 +421,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check for pending Telegram authentication
+  app.get("/api/auth/telegram/check/:telegramId", async (req, res) => {
+    const telegramId = req.params.telegramId;
+    const pendingAuth = (global as any).pendingTelegramAuth?.[telegramId];
+    
+    if (pendingAuth && (Date.now() - pendingAuth.timestamp < 300000)) { // 5 minute expiry
+      // Clear the pending auth
+      delete (global as any).pendingTelegramAuth[telegramId];
+      
+      res.json({
+        success: true,
+        user: pendingAuth.user,
+        authData: pendingAuth.authData
+      });
+    } else {
+      res.json({ success: false });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
