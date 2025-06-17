@@ -1,7 +1,7 @@
 import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertMatchSchema, insertTrainingSchema, insertTournamentSchema, insertCoachSchema } from "@shared/schema";
+import { insertUserSchema, insertMatchSchema, insertTrainingSchema, insertTournamentSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -258,7 +258,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/coaches", async (req, res) => {
     try {
-      const validatedData = insertCoachSchema.parse(req.body);
+      const validatedData = insertUserSchema.parse({
+        ...req.body,
+        isCoach: true
+      });
       const coach = await storage.createCoach(validatedData);
       res.json(coach);
     } catch (error) {

@@ -68,7 +68,7 @@ export class MemStorage implements IStorage {
   private currentTournamentId = 1;
   private currentRankingId = 1;
   private currentFollowId = 1;
-  private currentCoachId = 1;
+
 
   constructor() {
     // No seed data - using real database only
@@ -101,6 +101,16 @@ export class MemStorage implements IStorage {
       backhandProgress: 0,
       enduranceProgress: 0,
       achievements: [],
+      // Coach fields
+      isCoach: insertUser.isCoach || false,
+      specialization: insertUser.specialization || null,
+      experience: insertUser.experience || null,
+      rating: insertUser.rating || null,
+      hourlyRate: insertUser.hourlyRate || null,
+      bio: insertUser.bio || null,
+      phone: insertUser.phone || null,
+      email: insertUser.email || null,
+      availability: insertUser.availability || null,
       createdAt: new Date(),
     };
     this.users.set(id, user);
@@ -310,45 +320,28 @@ export class MemStorage implements IStorage {
     return false;
   }
 
-  // Coaches
-  async getCoach(id: number): Promise<Coach | undefined> {
-    return this.coaches.get(id);
+  // Coaches (users with isCoach=true)
+  async getCoach(id: number): Promise<User | undefined> {
+    const user = this.users.get(id);
+    return user?.isCoach ? user : undefined;
   }
 
-  async getAllCoaches(): Promise<Coach[]> {
-    return Array.from(this.coaches.values()).sort((a, b) => a.name.localeCompare(b.name));
+  async getAllCoaches(): Promise<User[]> {
+    return Array.from(this.users.values())
+      .filter(user => user.isCoach)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async createCoach(insertCoach: InsertCoach): Promise<Coach> {
-    const id = this.currentCoachId++;
-    const coach: Coach = {
-      id,
-      name: insertCoach.name,
-      specialization: insertCoach.specialization || null,
-      experience: insertCoach.experience || null,
-      rating: insertCoach.rating || null,
-      hourlyRate: insertCoach.hourlyRate || null,
-      bio: insertCoach.bio || null,
-      avatarUrl: insertCoach.avatarUrl || null,
-      phone: insertCoach.phone || null,
-      email: insertCoach.email || null,
-      availability: insertCoach.availability || null,
-      createdAt: new Date(),
+  async createCoach(insertUser: Partial<InsertUser>): Promise<User> {
+    const coachData = {
+      ...insertUser,
+      isCoach: true,
     };
-    this.coaches.set(id, coach);
-    return coach;
+    return this.createUser(coachData as InsertUser);
   }
 
-  async updateCoach(id: number, updates: Partial<InsertCoach>): Promise<Coach | undefined> {
-    const coach = this.coaches.get(id);
-    if (!coach) return undefined;
-    
-    const updatedCoach: Coach = {
-      ...coach,
-      ...updates,
-    };
-    this.coaches.set(id, updatedCoach);
-    return updatedCoach;
+  async updateCoach(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
+    return this.updateUser(id, updates);
   }
 }
 
@@ -542,29 +535,33 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount || 0) > 0;
   }
 
-  // Coaches
-  async getCoach(id: number): Promise<Coach | undefined> {
-    const [coach] = await db.select().from(coaches).where(eq(coaches.id, id));
-    return coach || undefined;
+  // Coaches (users with isCoach=true)
+  async getCoach(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(and(eq(users.id, id), eq(users.isCoach, true)));
+    return user || undefined;
   }
 
-  async getAllCoaches(): Promise<Coach[]> {
-    return await db.select().from(coaches).orderBy(coaches.name);
+  async getAllCoaches(): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.isCoach, true)).orderBy(users.name);
   }
 
-  async createCoach(insertCoach: InsertCoach): Promise<Coach> {
+  async createCoach(insertUser: Partial<InsertUser>): Promise<User> {
+    const coachData = {
+      ...insertUser,
+      isCoach: true,
+    };
     const [coach] = await db
-      .insert(coaches)
-      .values(insertCoach)
+      .insert(users)
+      .values(coachData as InsertUser)
       .returning();
     return coach;
   }
 
-  async updateCoach(id: number, updates: Partial<InsertCoach>): Promise<Coach | undefined> {
+  async updateCoach(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
     const [coach] = await db
-      .update(coaches)
+      .update(users)
       .set(updates)
-      .where(eq(coaches.id, id))
+      .where(eq(users.id, id))
       .returning();
     return coach || undefined;
   }

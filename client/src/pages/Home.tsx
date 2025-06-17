@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { User, Coach } from "@shared/schema";
+import { User } from "@shared/schema";
 import AvatarUpload from "@/components/AvatarUpload";
 import { useLocation } from "wouter";
 import { Edit } from "lucide-react";
@@ -25,7 +25,7 @@ export default function Home() {
     queryKey: ["/api/users"],
   });
 
-  const { data: coaches = [] } = useQuery<Coach[]>({
+  const { data: coaches = [] } = useQuery<User[]>({
     queryKey: ["/api/coaches"],
   });
 
@@ -155,7 +155,7 @@ export default function Home() {
                           alt={coach.name}
                         />
                         <AvatarFallback className="text-xs">
-                          {coach.name.split(' ').map(n => n[0]).join('')}
+                          {coach.name.split(' ').map((n: string) => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
