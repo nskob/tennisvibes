@@ -98,10 +98,47 @@ export default function PlayerProfile() {
         <div className="flex justify-center mb-4">
           <AvatarUpload user={player} size="lg" showUploadButton={false} />
         </div>
-        <h1 className="text-2xl mb-2">{player.name}</h1>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <h1 className="text-2xl">{player.name}</h1>
+          {player.isCoach && (
+            <Badge variant="secondary">
+              <Award className="w-3 h-3 mr-1" />
+              Тренер
+            </Badge>
+          )}
+        </div>
         <p className="text-gray-400 text-sm">
           {player.club || "Теннисист"}
         </p>
+        
+        {/* Coach-specific info */}
+        {player.isCoach && (
+          <div className="mt-4 space-y-2">
+            {player.specialization && (
+              <p className="text-blue-600 text-sm">
+                {getSpecializationLabel(player.specialization)}
+              </p>
+            )}
+            
+            {player.rating && (
+              <div className="flex items-center justify-center gap-1">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span className="text-sm font-medium">{player.rating}</span>
+                {player.experience && (
+                  <span className="text-gray-400 text-sm ml-2">
+                    {player.experience} лет опыта
+                  </span>
+                )}
+              </div>
+            )}
+            
+            {player.bio && (
+              <p className="text-gray-600 text-sm mt-3 max-w-md mx-auto">
+                {player.bio}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Stats */}
@@ -131,6 +168,51 @@ export default function PlayerProfile() {
           <div className="text-sm text-gray-400">Турниров</div>
         </div>
       </div>
+
+      {/* Coach-specific stats and contact */}
+      {player.isCoach && (
+        <div className="mb-8">
+          <h3 className="text-lg font-medium mb-4">Информация о тренере</h3>
+          
+          {/* Coach stats */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="text-center">
+              <div className="text-2xl font-medium text-blue-600">
+                {recentCoachTraining.length}
+              </div>
+              <div className="text-sm text-gray-400">Активных тренировок</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-medium text-green-600">
+                {player.hourlyRate ? `${player.hourlyRate}₽` : "—"}
+              </div>
+              <div className="text-sm text-gray-400">За час</div>
+            </div>
+          </div>
+
+          {/* Contact info */}
+          <div className="space-y-3">
+            {player.phone && (
+              <div className="flex items-center gap-3">
+                <Phone className="w-4 h-4 text-gray-400" />
+                <span className="text-sm">{player.phone}</span>
+              </div>
+            )}
+            {player.email && (
+              <div className="flex items-center gap-3">
+                <Mail className="w-4 h-4 text-gray-400" />
+                <span className="text-sm">{player.email}</span>
+              </div>
+            )}
+            {player.availability && (
+              <div className="flex items-center gap-3">
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span className="text-sm">{player.availability}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Player Info Grid */}
       <div className="grid grid-cols-1 gap-4 mb-8">
@@ -184,6 +266,32 @@ export default function PlayerProfile() {
                 </span>
                 <span className="text-gray-400 mx-2">·</span>
                 <span className="text-gray-400">{formatMatchDate(session.createdAt || session.date)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Coach's Training Sessions */}
+      {player.isCoach && recentCoachTraining.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg mb-4 flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Проводимые тренировки
+          </h2>
+          <div className="space-y-3">
+            {recentCoachTraining.map((session: any) => (
+              <div key={session.id} className="text-sm">
+                <span className="text-app-text">
+                  {session.type || 'Тренировка'} - {session.duration || 60} мин
+                </span>
+                <span className="text-gray-400 mx-2">·</span>
+                <span className="text-gray-400">{formatMatchDate(session.createdAt || session.date)}</span>
+                {session.notes && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {session.notes}
+                  </div>
+                )}
               </div>
             ))}
           </div>

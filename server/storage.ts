@@ -27,6 +27,7 @@ export interface IStorage {
   // Training
   getTraining(id: number): Promise<Training | undefined>;
   getTrainingByUserId(userId: number): Promise<Training[]>;
+  getAllTraining(): Promise<Training[]>;
   createTraining(training: InsertTraining): Promise<Training>;
   
   // Tournaments

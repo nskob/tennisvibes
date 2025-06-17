@@ -164,6 +164,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(training);
   });
 
+  app.get("/api/training/coach/:coachId", async (req, res) => {
+    try {
+      const coachId = parseInt(req.params.coachId);
+      const coach = await storage.getCoach(coachId);
+      if (!coach) {
+        return res.status(404).json({ message: "Coach not found" });
+      }
+      // Get training sessions where this coach is teaching
+      const allTraining = await storage.getAllTraining();
+      const coachTraining = allTraining.filter((session: any) => 
+        session.coach === coach.name
+      );
+      res.json(coachTraining);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch coach training", error });
+    }
+  });
+
   app.post("/api/training", async (req, res) => {
     try {
       const trainingData = insertTrainingSchema.parse(req.body);
