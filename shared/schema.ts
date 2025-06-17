@@ -20,6 +20,16 @@ export const users = pgTable("users", {
   backhandProgress: integer("backhand_progress").default(0),
   enduranceProgress: integer("endurance_progress").default(0),
   achievements: text("achievements").array().default([]),
+  // Coach fields
+  isCoach: boolean("is_coach").default(false),
+  specialization: text("specialization"), // 'serve', 'backhand', 'fitness', 'mental', 'general'
+  experience: integer("experience"), // years of experience
+  rating: integer("rating"), // 1-5 star rating
+  hourlyRate: integer("hourly_rate"), // rate per hour in currency units
+  bio: text("bio"),
+  phone: text("phone"),
+  email: text("email"),
+  availability: text("availability"), // JSON string or simple text
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -68,21 +78,6 @@ export const rankings = pgTable("rankings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const coaches = pgTable("coaches", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  specialization: text("specialization"), // 'serve', 'backhand', 'fitness', 'mental', 'general'
-  experience: integer("experience"), // years of experience
-  rating: integer("rating").default(5), // 1-5 star rating
-  hourlyRate: integer("hourly_rate"), // rate per hour in currency units
-  bio: text("bio"),
-  avatarUrl: text("avatar_url"),
-  phone: text("phone"),
-  email: text("email"),
-  availability: text("availability"), // JSON string or simple text
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
 export const follows = pgTable("follows", {
   id: serial("id").primaryKey(),
   followerId: integer("follower_id").notNull().references(() => users.id),
@@ -119,11 +114,6 @@ export const insertRankingSchema = createInsertSchema(rankings).omit({
   id: true,
 });
 
-export const insertCoachSchema = createInsertSchema(coaches).omit({
-  id: true,
-  createdAt: true,
-});
-
 export const insertFollowSchema = createInsertSchema(follows).omit({
   id: true,
   createdAt: true,
@@ -140,7 +130,5 @@ export type Tournament = typeof tournaments.$inferSelect;
 export type InsertTournament = z.infer<typeof insertTournamentSchema>;
 export type Ranking = typeof rankings.$inferSelect;
 export type InsertRanking = z.infer<typeof insertRankingSchema>;
-export type Coach = typeof coaches.$inferSelect;
-export type InsertCoach = z.infer<typeof insertCoachSchema>;
 export type Follow = typeof follows.$inferSelect;
 export type InsertFollow = z.infer<typeof insertFollowSchema>;

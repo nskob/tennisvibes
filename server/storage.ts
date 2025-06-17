@@ -1,12 +1,11 @@
 import { 
-  users, matches, training as trainingTable, tournaments, rankings, follows, coaches,
+  users, matches, training as trainingTable, tournaments, rankings, follows,
   type User, type InsertUser,
   type Match, type InsertMatch,
   type Training, type InsertTraining,
   type Tournament, type InsertTournament,
   type Ranking, type InsertRanking,
-  type Follow, type InsertFollow,
-  type Coach, type InsertCoach
+  type Follow, type InsertFollow
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, or, desc, and } from "drizzle-orm";
@@ -41,11 +40,11 @@ export interface IStorage {
   getAllRankings(): Promise<Ranking[]>;
   updateRanking(userId: number, rating: number): Promise<Ranking>;
   
-  // Coaches
-  getCoach(id: number): Promise<Coach | undefined>;
-  getAllCoaches(): Promise<Coach[]>;
-  createCoach(coach: InsertCoach): Promise<Coach>;
-  updateCoach(id: number, updates: Partial<InsertCoach>): Promise<Coach | undefined>;
+  // Coaches (users with isCoach=true)
+  getCoach(id: number): Promise<User | undefined>;
+  getAllCoaches(): Promise<User[]>;
+  createCoach(coach: Partial<InsertUser>): Promise<User>;
+  updateCoach(id: number, updates: Partial<InsertUser>): Promise<User | undefined>;
   
   // Follows
   getFollowsByUserId(userId: number): Promise<Follow[]>;
@@ -61,7 +60,7 @@ export class MemStorage implements IStorage {
   private tournaments: Map<number, Tournament> = new Map();
   private rankings: Map<number, Ranking> = new Map();
   private follows: Map<number, Follow> = new Map();
-  private coaches: Map<number, Coach> = new Map();
+
   
   private currentUserId = 1;
   private currentMatchId = 1;
