@@ -57,6 +57,10 @@ export class TelegramBot {
     try {
       const response = await fetch(`${TELEGRAM_API_URL}/getUpdates?offset=${this.lastUpdateId + 1}&timeout=10`);
       if (!response.ok) {
+        if (response.status === 409) {
+          // Conflict error - another polling session is active, skip silently
+          return;
+        }
         throw new Error(`Failed to get updates: ${response.statusText}`);
       }
 
@@ -68,7 +72,9 @@ export class TelegramBot {
         }
       }
     } catch (error) {
-      console.error('Error getting updates:', error);
+      if (!error.message.includes('Conflict')) {
+        console.error('Error getting updates:', error);
+      }
     }
   }
 
