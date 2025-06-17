@@ -51,7 +51,7 @@ export default function Login() {
       }
     };
 
-    // Wait for DOM to be ready
+    // Load Telegram Widget
     const loadTelegramWidget = () => {
       const telegramContainer = document.getElementById("telegram-login-container");
       if (!telegramContainer) {
@@ -62,7 +62,19 @@ export default function Login() {
       // Clear existing content
       telegramContainer.innerHTML = '';
 
-      // Load Telegram Widget script
+      // Direct HTML insertion for Telegram Login Widget
+      telegramContainer.innerHTML = `
+        <script 
+          async 
+          src="https://telegram.org/js/telegram-widget.js?22"
+          data-telegram-login="sport_vibes_bot"
+          data-size="large"
+          data-onauth="onTelegramAuth(user)"
+          data-request-access="write">
+        </script>
+      `;
+
+      // Also try dynamic script method as fallback
       const script = document.createElement("script");
       script.src = "https://telegram.org/js/telegram-widget.js?22";
       script.setAttribute("data-telegram-login", "sport_vibes_bot");
@@ -77,10 +89,9 @@ export default function Login() {
       
       script.onerror = (error) => {
         console.error("Failed to load Telegram widget script:", error);
-        telegramContainer.innerHTML = '<div class="text-red-500 text-sm">Ошибка загрузки виджета Telegram. Проверьте настройки домена в боте.</div>';
       };
 
-      telegramContainer.appendChild(script);
+      document.head.appendChild(script);
     };
 
     // Load widget after a short delay to ensure DOM is ready
