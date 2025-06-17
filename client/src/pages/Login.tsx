@@ -155,29 +155,27 @@ export default function Login() {
         }
 
         // Start polling for authentication completion
+        let initialUserCount = 0;
+        
+        // Get initial user count
+        fetch('/api/users').then(res => res.json()).then(users => {
+          initialUserCount = users.length;
+        });
+
         const checkAuthInterval = setInterval(async () => {
           try {
-            // We'll check for any successful Telegram auth by checking all recent users
-            const response = await fetch('/api/users');
-            const users = await response.json();
+            // Check for latest Telegram user authentication
+            const response = await fetch('/api/auth/telegram/latest');
+            const result = await response.json();
             
-            // Look for recently created Telegram users (created in last 5 minutes)
-            const recentTelegramUsers = users.filter((user: any) => 
-              user.authProvider === 'telegram' && 
-              user.id > 1 // Not the default user
-            );
-
-            if (recentTelegramUsers.length > 0) {
-              // Take the most recent user
-              const latestUser = recentTelegramUsers[recentTelegramUsers.length - 1];
-              
+            if (result.success && result.user) {
               // Store user data and redirect
-              localStorage.setItem("user", JSON.stringify(latestUser));
+              localStorage.setItem("user", JSON.stringify(result.user));
               
               setIsLoading(false);
               toast({
                 title: "Успешный вход",
-                description: `Добро пожаловать, ${latestUser.name}!`,
+                description: `Добро пожаловать, ${result.user.name}!`,
               });
 
               clearInterval(checkAuthInterval);
@@ -186,7 +184,7 @@ export default function Login() {
           } catch (error) {
             console.error('Error checking auth status:', error);
           }
-        }, 3000); // Check every 3 seconds
+        }, 2000); // Check every 2 seconds
 
         // Stop checking after 5 minutes
         setTimeout(() => {

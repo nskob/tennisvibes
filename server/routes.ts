@@ -48,6 +48,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Users
   app.get("/api/users", async (req, res) => {
+    // Disable caching for user list to ensure fresh data
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     const users = await storage.getAllUsers();
     res.json(users);
   });
@@ -437,6 +442,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } else {
       res.json({ success: false });
+    }
+  });
+
+  // Get the latest Telegram user (for authentication polling)
+  app.get("/api/auth/telegram/latest", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const telegramUsers = users.filter((user: any) => 
+        user.authProvider === 'telegram' || user.telegramId
+      );
+      
+      if (telegramUsers.length > 0) {
+        // Return the most recent Telegram user
+        const latestUser = telegramUsers.reduce((latest: any, current: any) => 
+          current.id > latest.id ? current : latest
+        );
+        
+        res.json({
+          success: true,
+          user: latestUser
+        });
+      } else {
+        res.json({ success: false });
+      }
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Failed to get latest user' });
     }
   });
 
