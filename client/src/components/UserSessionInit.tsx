@@ -9,7 +9,8 @@ export default function UserSessionInit() {
         if (response.ok) {
           const userData = await response.json();
           localStorage.setItem("user", JSON.stringify(userData));
-
+          // Force page refresh to show updated profile photo
+          setTimeout(() => window.location.reload(), 500);
         }
       } catch (error) {
         console.error("Failed to initialize user session:", error);
@@ -23,8 +24,8 @@ export default function UserSessionInit() {
     } else {
       const parsedUser = JSON.parse(currentUser);
       
-      // Ensure we have Nikita Skob's data
-      if (parsedUser.id !== 13) {
+      // Ensure we have Nikita Skob's data and check if avatar URL needs updating
+      if (parsedUser.id !== 13 || parsedUser.avatarUrl?.includes('profile_photos/file_1.jpg')) {
         initializeUserSession();
       }
     }
