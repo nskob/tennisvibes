@@ -157,7 +157,19 @@ export default function Login() {
         // Start polling for authentication completion
         let initialUserCount = 0;
         
-        // Get initial user count
+        // Check immediately if there's already a Telegram user authenticated
+        fetch('/api/auth/telegram/latest').then(res => res.json()).then(result => {
+          if (result.success && result.user) {
+            localStorage.setItem("user", JSON.stringify(result.user));
+            toast({
+              title: "Успешный вход",
+              description: `Добро пожаловать, ${result.user.name}!`,
+            });
+            setLocation("/home");
+          }
+        });
+
+        // Get initial user count for fallback
         fetch('/api/users').then(res => res.json()).then(users => {
           initialUserCount = users.length;
         });
