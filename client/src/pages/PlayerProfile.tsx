@@ -1,15 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import AvatarUpload from "@/components/AvatarUpload";
-import { ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Award, Star, Phone, Mail, Clock, Users } from "lucide-react";
 import { formatMatchDate } from "@/lib/dateUtils";
+import { User } from "@shared/schema";
 
 export default function PlayerProfile() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const playerId = params.id;
 
-  const { data: player, isLoading } = useQuery({
+  const { data: player, isLoading } = useQuery<User>({
     queryKey: [`/api/users/${playerId}`],
   });
 
@@ -19,6 +21,12 @@ export default function PlayerProfile() {
 
   const { data: training } = useQuery({
     queryKey: [`/api/training/user/${playerId}`],
+  });
+
+  // If this is a coach, get their training sessions as a coach
+  const { data: coachTraining } = useQuery({
+    queryKey: [`/api/training/coach/${playerId}`],
+    enabled: player?.isCoach === true,
   });
 
   if (isLoading) {
@@ -44,6 +52,20 @@ export default function PlayerProfile() {
 
   const recentMatches = Array.isArray(matches) ? matches.slice(0, 5) : [];
   const recentTraining = Array.isArray(training) ? training.slice(0, 5) : [];
+  const recentCoachTraining = Array.isArray(coachTraining) ? coachTraining.slice(0, 5) : [];
+
+  const getSpecializationLabel = (specialization: string | null) => {
+    const labels: Record<string, string> = {
+      serve: "Подача",
+      backhand: "Бэкхенд",
+      forehand: "Форхенд", 
+      volley: "Игра у сетки",
+      fitness: "Физподготовка",
+      mental: "Психология",
+      general: "Общая подготовка",
+    };
+    return specialization ? labels[specialization] || specialization : "Общая подготовка";
+  };
 
   const formatDate = (date: string | Date) => {
     const d = new Date(date);

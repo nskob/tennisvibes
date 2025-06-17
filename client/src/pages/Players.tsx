@@ -2,16 +2,24 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { User } from "@shared/schema";
+import { Star, Users, Award } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 
 export default function Players() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
+  });
+
+  const { data: coaches } = useQuery<User[]>({
+    queryKey: ["/api/coaches"],
   });
 
   const { data: follows } = useQuery({
@@ -69,11 +77,18 @@ export default function Players() {
   }
 
   // Filter out current user and apply search
-  const players = Array.isArray(users) ? users
-    .filter((user: any) => user.id !== 1)
-    .filter((user: any) => 
+  const allPlayers = Array.isArray(users) ? users
+    .filter((user: User) => user.id !== 1)
+    .filter((user: User) => 
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.username.toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
+
+  const filteredCoaches = Array.isArray(coaches) ? coaches
+    .filter((coach: User) => coach.id !== 1)
+    .filter((coach: User) => 
+      coach.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      coach.username.toLowerCase().includes(searchTerm.toLowerCase())
     ) : [];
 
   const followedPlayerIds = new Set(Array.isArray(follows) ? follows.map((follow: any) => follow.followingId) : []);
@@ -86,7 +101,78 @@ export default function Players() {
     }
   };
 
+  const getSpecializationLabel = (specialization: string | null) => {
+    const labels: Record<string, string> = {
+      serve: "Подача",
+      backhand: "Бэкхенд", 
+      forehand: "Форхенд",
+      volley: "Игра у сетки",
+      fitness: "Физподготовка",
+      mental: "Психология",
+      general: "Общая подготовка",
+    };
+    return specialization ? labels[specialization] || specialization : "Общая подготовка";
+  };
 
+  const PlayerCard = ({ player }: { player: User }) => {
+    const isFollowing = followedPlayerIds.has(player.id);
+    
+    return (
+      <div key={player.id} className="flex items-center space-x-4">
+        <Link href={`/player/${player.id}`}>
+          <div className="cursor-pointer">
+            <AvatarUpload user={player} size="md" showUploadButton={false} />
+          </div>
+        </Link>
+        <div className="flex-1">
+          <Link href={`/player/${player.id}`}>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="font-medium cursor-pointer hover:text-app-primary">
+                {player.name}
+              </div>
+              {player.isCoach && (
+                <Badge variant="secondary" className="text-xs">
+                  <Award className="w-3 h-3 mr-1" />
+                  Тренер
+                </Badge>
+              )}
+            </div>
+          </Link>
+          
+          <div className="space-y-1">
+            <div className="text-sm text-gray-400">
+              Уровень {player.skillLevel || '3.0'}
+            </div>
+            
+            {player.isCoach && player.specialization && (
+              <div className="text-blue-600 text-sm">
+                {getSpecializationLabel(player.specialization)}
+              </div>
+            )}
+            
+            {player.isCoach && player.rating && (
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <span className="text-sm font-medium">{player.rating}</span>
+                {player.experience && (
+                  <span className="text-gray-400 text-sm ml-2">
+                    {player.experience} лет опыта
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <button
+          onClick={() => handleFollowToggle(player.id, isFollowing)}
+          disabled={followMutation.isPending || unfollowMutation.isPending}
+          className="btn-text text-app-primary"
+        >
+          {isFollowing ? "Отписаться" : "Подписаться"}
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="p-6 pt-12">
@@ -103,45 +189,58 @@ export default function Players() {
         />
       </div>
 
-      {/* Players List */}
-      <div className="space-y-4">
-        {players.map((player: any) => {
-          const isFollowing = followedPlayerIds.has(player.id);
-          
-          return (
-            <div key={player.id} className="flex items-center space-x-4">
-              <Link href={`/player/${player.id}`}>
-                <div className="cursor-pointer">
-                  <AvatarUpload user={player} size="md" showUploadButton={false} />
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Все игроки ({allPlayers.length})
+          </TabsTrigger>
+          <TabsTrigger value="coaches" className="flex items-center gap-2">
+            <Award className="w-4 h-4" />
+            Тренеры ({filteredCoaches.length})
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="all">
+          <div className="space-y-4">
+            {allPlayers.map((player) => (
+              <PlayerCard key={player.id} player={player} />
+            ))}
+            
+            {allPlayers.length === 0 && (
+              <div className="text-center text-gray-400 py-8">
+                <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <div className="text-lg font-medium mb-2">
+                  {searchTerm ? "Игроки не найдены" : "Нет игроков"}
                 </div>
-              </Link>
-              <div className="flex-1">
-                <Link href={`/player/${player.id}`}>
-                  <div className="font-medium cursor-pointer hover:text-app-primary">
-                    {player.name}
-                  </div>
-                </Link>
-                <div className="text-sm text-gray-400">
-                  Skill {player.skillLevel || '3.0'}
+                <div className="text-sm">
+                  {searchTerm ? "Попробуйте изменить поисковый запрос" : "Пока нет зарегистрированных игроков"}
                 </div>
               </div>
-              <button
-                onClick={() => handleFollowToggle(player.id, isFollowing)}
-                disabled={followMutation.isPending || unfollowMutation.isPending}
-                className="btn-text text-app-primary"
-              >
-                {isFollowing ? "Unfollow" : "Follow"}
-              </button>
-            </div>
-          );
-        })}
-        
-        {players.length === 0 && (
-          <div className="text-center text-gray-400 py-8">
-            {searchTerm ? "No players found matching your search." : "No players available."}
+            )}
           </div>
-        )}
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="coaches">
+          <div className="space-y-4">
+            {filteredCoaches.map((coach) => (
+              <PlayerCard key={coach.id} player={coach} />
+            ))}
+            
+            {filteredCoaches.length === 0 && (
+              <div className="text-center text-gray-400 py-8">
+                <Award className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <div className="text-lg font-medium mb-2">
+                  {searchTerm ? "Тренеры не найдены" : "Нет тренеров"}
+                </div>
+                <div className="text-sm">
+                  {searchTerm ? "Попробуйте изменить поисковый запрос" : "Пока нет зарегистрированных тренеров"}
+                </div>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
