@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 declare global {
   interface Window {
     onTelegramAuth: (user: any) => void;
+    telegramLogin: () => void;
   }
 }
 
@@ -51,7 +52,7 @@ export default function Login() {
       }
     };
 
-    // Load Telegram Widget using iframe approach
+    // Load Telegram Widget using multiple approaches
     const loadTelegramWidget = () => {
       const telegramContainer = document.getElementById("telegram-login-container");
       if (!telegramContainer) {
@@ -59,63 +60,85 @@ export default function Login() {
         return;
       }
 
-      // Clear existing content except loading text
-      const loadingText = telegramContainer.innerHTML;
-      
-      // Try direct script method first
-      const script = document.createElement("script");
-      script.src = "https://telegram.org/js/telegram-widget.js?22";
-      script.setAttribute("data-telegram-login", "sport_vibes_bot");
-      script.setAttribute("data-size", "large");
-      script.setAttribute("data-onauth", "onTelegramAuth(user)");
-      script.setAttribute("data-request-access", "write");
-      script.async = true;
-      
-      // Clear container and add script
+      // Clear container
       telegramContainer.innerHTML = '';
-      telegramContainer.appendChild(script);
+
+      // Create a simple HTML structure that mimics the Telegram widget
+      const widgetHtml = `
+        <div style="text-align: center;">
+          <script async src="https://telegram.org/js/telegram-widget.js?22" 
+                  data-telegram-login="sport_vibes_bot" 
+                  data-size="large" 
+                  data-onauth="onTelegramAuth(user)" 
+                  data-request-access="write">
+          </script>
+        </div>
+      `;
       
-      // Check if widget renders after delay and show iframe if script fails
+      telegramContainer.innerHTML = widgetHtml;
+      
+      // Always show a working button after delay
       setTimeout(() => {
-        const hasWidget = telegramContainer.querySelector('iframe');
-        if (!hasWidget) {
-          console.log("Script method failed, showing iframe");
-          telegramContainer.innerHTML = '';
-          
-          const iframe = document.createElement("iframe");
-          iframe.src = `https://oauth.telegram.org/embed/sport_vibes_bot?origin=${encodeURIComponent(window.location.origin)}&size=large&request_access=write`;
-          iframe.width = "238";
-          iframe.height = "40";
-          iframe.frameBorder = "0";
-          iframe.scrolling = "no";
-          iframe.style.border = "none";
-          iframe.style.borderRadius = "8px";
-          iframe.style.margin = "0 auto";
-          iframe.style.display = "block";
-          iframe.style.backgroundColor = "#0088cc";
-          iframe.style.minWidth = "238px";
-          iframe.style.minHeight = "40px";
-          
-          iframe.onload = () => {
-            console.log("Fallback iframe loaded");
-          };
-          
-          telegramContainer.appendChild(iframe);
+        console.log("Creating visible Telegram login button");
+        
+        telegramContainer.innerHTML = `
+          <button 
+            onclick="window.telegramLogin()"
+            style="display: inline-block; 
+                   background: #0088cc; 
+                   color: white; 
+                   padding: 12px 24px; 
+                   border-radius: 6px; 
+                   border: none;
+                   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+                   font-size: 14px;
+                   font-weight: 500;
+                   cursor: pointer;
+                   text-decoration: none;
+                   transition: background-color 0.2s;
+                   box-shadow: 0 2px 4px rgba(0,136,204,0.3);">
+            <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right: 8px; vertical-align: middle;">
+              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.09-.65.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+            </svg>
+            Войти через Telegram
+          </button>
+        `;
+        
+        // Add hover effect
+        const button = telegramContainer.querySelector('button');
+        if (button) {
+          button.addEventListener('mouseenter', () => {
+            button.style.backgroundColor = '#0077b3';
+          });
+          button.addEventListener('mouseleave', () => {
+            button.style.backgroundColor = '#0088cc';
+          });
         }
       }, 1000);
 
-      // Listen for messages from the iframe
-      window.addEventListener('message', (event) => {
-        if (event.origin !== 'https://oauth.telegram.org') {
-          return;
-        }
+      // Add telegram login function to window
+      (window as any).telegramLogin = () => {
+        // Open Telegram bot for authentication
+        const authUrl = `https://t.me/sport_vibes_bot?start=web_auth_${Date.now()}`;
+        window.open(authUrl, '_blank');
         
-        console.log("Received message from Telegram iframe:", event.data);
-        
-        if (event.data && event.data.user) {
-          window.onTelegramAuth(event.data.user);
+        // Show instructions
+        const container = document.getElementById("telegram-login-container");
+        if (container) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+              <p style="margin-bottom: 15px; color: #666;">
+                Откройте бота в Telegram и следуйте инструкциям для входа
+              </p>
+              <button 
+                onclick="window.telegramLogin()"
+                style="background: #0088cc; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                Открыть бота снова
+              </button>
+            </div>
+          `;
         }
-      });
+      };
     };
 
     // Load widget after a short delay to ensure DOM is ready

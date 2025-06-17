@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertMatchSchema, insertTrainingSchema, insertTournamentSchema } from "@shared/schema";
 import { verifyTelegramAuth, isAuthDataRecent, type TelegramAuthData } from "./telegram-auth";
+import { telegramBot } from "./telegram-bot";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
