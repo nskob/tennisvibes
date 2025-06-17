@@ -93,6 +93,7 @@ export default function AvatarUpload({ user, size = "md", showUploadButton = fal
   };
 
   const getInitials = (name: string) => {
+    if (!name) return "??";
     return name
       .split(' ')
       .map(n => n[0])
@@ -111,7 +112,7 @@ export default function AvatarUpload({ user, size = "md", showUploadButton = fal
             className="object-cover"
           />
           <AvatarFallback className="bg-cream-200 text-dark-brown font-medium">
-            {getInitials(user.name)}
+            {getInitials(user.name || "User")}
           </AvatarFallback>
         </Avatar>
         

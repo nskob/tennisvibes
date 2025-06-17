@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { useLocation } from "wouter";
 import TabBar from "./TabBar";
 import AuthButton from "./AuthButton";
@@ -8,8 +8,16 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const isLoginPage = location === "/login";
+
+  // Check authentication status on layout mount
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (!userData && !isLoginPage) {
+      setLocation("/login");
+    }
+  }, [location, setLocation, isLoginPage]);
 
   return (
     <div className="max-w-md mx-auto min-h-screen relative" style={{ backgroundColor: 'var(--app-bg)' }}>

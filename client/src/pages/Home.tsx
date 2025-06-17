@@ -5,20 +5,34 @@ import { useLocation } from "wouter";
 import { Edit } from "lucide-react";
 import { formatMatchDate } from "@/lib/dateUtils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  
+  // Get current user from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      setCurrentUserId(user.id);
+    }
+  }, []);
   
   const { data: user, isLoading } = useQuery<User>({
-    queryKey: ["/api/users/4"], // Main user ID from database
+    queryKey: ["/api/users", currentUserId],
+    enabled: !!currentUserId, // Only run query when we have a user ID
   });
 
   const { data: matches, isLoading: matchesLoading } = useQuery({
-    queryKey: ["/api/matches/user/4"],
+    queryKey: ["/api/matches/user", currentUserId],
+    enabled: !!currentUserId,
   });
 
   const { data: training, isLoading: trainingLoading } = useQuery({
-    queryKey: ["/api/training/user/4"],
+    queryKey: ["/api/training/user", currentUserId],
+    enabled: !!currentUserId,
   });
 
   const { data: allUsers } = useQuery({
@@ -29,7 +43,17 @@ export default function Home() {
     queryKey: ["/api/coaches"],
   });
 
-  if (isLoading) {
+  // Redirect to login if no user is found in localStorage
+  useEffect(() => {
+    if (currentUserId === null) {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        setLocation("/login");
+      }
+    }
+  }, [currentUserId, setLocation]);
+
+  if (isLoading || !currentUserId) {
     return (
       <div className="p-6 pt-12">
         <div className="animate-pulse">
