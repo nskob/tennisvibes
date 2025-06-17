@@ -88,11 +88,13 @@ export default function Login() {
           iframe.height = "40";
           iframe.frameBorder = "0";
           iframe.scrolling = "no";
-          iframe.style.border = "1px solid #e5e7eb";
+          iframe.style.border = "none";
           iframe.style.borderRadius = "8px";
           iframe.style.margin = "0 auto";
           iframe.style.display = "block";
-          iframe.style.backgroundColor = "white";
+          iframe.style.backgroundColor = "#0088cc";
+          iframe.style.minWidth = "238px";
+          iframe.style.minHeight = "40px";
           
           iframe.onload = () => {
             console.log("Fallback iframe loaded");
