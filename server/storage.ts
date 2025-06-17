@@ -94,6 +94,7 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
+      password: insertUser.password || null,
       avatarUrl: insertUser.avatarUrl || null,
       skillLevel: insertUser.skillLevel || null,
       club: insertUser.club || null,
@@ -370,6 +371,11 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByTelegramId(telegramId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.telegramId, telegramId));
     return user || undefined;
   }
 

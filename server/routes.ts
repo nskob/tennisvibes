@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertMatchSchema, insertTrainingSchema, insertTournamentSchema } from "@shared/schema";
+import { verifyTelegramAuth, isAuthDataRecent, type TelegramAuthData } from "./telegram-auth";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -322,6 +323,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: "Avatar upload failed", error });
+    }
+  });
+
+  // Telegram Authentication
+  app.post("/api/auth/telegram", async (req, res) => {
+    try {
+      const authData = req.body as TelegramAuthData;
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
+
+      if (!botToken) {
+        return res.status(500).json({ message: "Telegram bot token not configured" });
+      }
+
+      // Verify auth data authenticity
+      if (!verifyTelegramAuth(authData, botToken)) {
+        return res.status(400).json({ message: "Invalid Telegram authentication data" });
+      }
+
+      // Check if auth data is recent (within 24 hours)
+      if (!isAuthDataRecent(authData.auth_date)) {
+        return res.status(400).json({ message: "Authentication data is too old" });
+      }
+
+      // Check if user already exists
+      let user = await storage.getUserByTelegramId(authData.id);
+
+      if (!user) {
+        // Create new user from Telegram data
+        const newUserData = {
+          name: `${authData.first_name || ''} ${authData.last_name || ''}`.trim() || authData.username || `User${authData.id}`,
+          username: authData.username || `tg_${authData.id}`,
+          password: null,
+          avatarUrl: authData.photo_url || null,
+          telegramId: authData.id,
+          telegramUsername: authData.username,
+          telegramFirstName: authData.first_name,
+          telegramLastName: authData.last_name,
+          telegramPhotoUrl: authData.photo_url,
+          authProvider: "telegram" as const,
+          skillLevel: "3.0",
+          wins: 0,
+          losses: 0,
+          matchesPlayed: 0,
+          tournamentsPlayed: 0,
+          serveProgress: 0,
+          backhandProgress: 0,
+          enduranceProgress: 0,
+          achievements: [],
+          isCoach: false,
+        };
+
+        user = await storage.createUser(newUserData);
+      } else {
+        // Update existing user's Telegram data
+        const updates: any = {
+          telegramUsername: authData.username,
+          telegramFirstName: authData.first_name,
+          telegramLastName: authData.last_name,
+          telegramPhotoUrl: authData.photo_url,
+        };
+        
+        if (authData.photo_url && !user.avatarUrl) {
+          updates.avatarUrl = authData.photo_url;
+        }
+
+        user = await storage.updateUser(user.id, updates) || user;
+      }
+
+      // Return user data for successful authentication
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          avatarUrl: user.avatarUrl,
+          authProvider: user.authProvider,
+        }
+      });
+
+    } catch (error) {
+      console.error("Telegram auth error:", error);
+      res.status(500).json({ message: "Authentication failed" });
     }
   });
 
