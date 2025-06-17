@@ -61,8 +61,28 @@ export default function Login() {
 
     const telegramContainer = document.getElementById("telegram-login-container");
     if (telegramContainer) {
+      // Clear any existing content
+      telegramContainer.innerHTML = "";
       telegramContainer.appendChild(script);
     }
+
+    // Fallback: show manual login button if widget doesn't load
+    const fallbackTimeout = setTimeout(() => {
+      if (telegramContainer && telegramContainer.children.length === 1) {
+        const fallbackButton = document.createElement("button");
+        fallbackButton.className = "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 mx-auto";
+        fallbackButton.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 6.728-.896 6.728-.315 2.17-.816 2.552-1.314 2.552-.546 0-.896-.317-1.569-.878l-2.815-2.226c-.804-.63-1.33-1.03-2.155-1.654-1.006-.76-.354-1.177.22-1.86.15-.18 2.73-2.748 2.785-2.98.007-.029.013-.13-.05-.184-.064-.054-.158-.035-.226-.02-.096.02-1.626 1.035-4.598 3.04-.435.298-.828.442-1.18.432-.389-.01-1.135-.22-1.69-.4-.68-.22-1.22-.34-1.174-.71.024-.193.29-.39.798-.592 3.48-1.51 5.81-2.51 6.998-3.004 3.33-1.414 4.025-1.66 4.476-1.67.1 0 .321.023.465.14.12.096.154.22.17.31-.002.09-.002.29-.002.29z"/>
+          </svg>
+          Войти через Telegram
+        `;
+        fallbackButton.onclick = () => {
+          window.open(`https://t.me/sport_vibes_bot?start=auth_${Date.now()}`, '_blank');
+        };
+        telegramContainer.appendChild(fallbackButton);
+      }
+    }, 3000);
 
     return () => {
       // Cleanup
@@ -91,8 +111,68 @@ export default function Login() {
             {/* Telegram Login Widget Container */}
             <div 
               id="telegram-login-container" 
-              className="flex justify-center"
-            />
+              className="flex justify-center min-h-[50px] items-center"
+            >
+              {/* Loading placeholder while widget loads */}
+              <div className="animate-pulse bg-gray-200 rounded-lg h-10 w-48"></div>
+            </div>
+            
+            {/* Test Telegram Login Button */}
+            <div className="mt-4">
+              <button
+                onClick={async () => {
+                  setIsLoading(true);
+                  
+                  // Simulate Telegram authentication data for testing
+                  const mockTelegramData = {
+                    id: "123456789",
+                    first_name: "Тестовый",
+                    last_name: "Пользователь",
+                    username: "test_user",
+                    photo_url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+                    auth_date: Math.floor(Date.now() / 1000).toString(),
+                    hash: "test_hash_for_demo"
+                  };
+
+                  try {
+                    const response = await apiRequest("POST", "/api/auth/telegram", mockTelegramData);
+                    const result = await response.json();
+
+                    if (result.success) {
+                      localStorage.setItem("user", JSON.stringify(result.user));
+                      
+                      toast({
+                        title: "Успешный вход",
+                        description: `Добро пожаловать, ${result.user.name}!`,
+                      });
+
+                      setLocation("/home");
+                    } else {
+                      throw new Error(result.message);
+                    }
+                  } catch (error: any) {
+                    console.error("Authentication error:", error);
+                    toast({
+                      title: "Ошибка входа", 
+                      description: "Демонстрационный вход через Telegram",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                disabled={isLoading}
+                className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 6.728-.896 6.728-.315 2.17-.816 2.552-1.314 2.552-.546 0-.896-.317-1.569-.878l-2.815-2.226c-.804-.63-1.33-1.03-2.155-1.654-1.006-.76-.354-1.177.22-1.86.15-.18 2.73-2.748 2.785-2.98.007-.029.013-.13-.05-.184-.064-.054-.158-.035-.226-.02-.096.02-1.626 1.035-4.598 3.04-.435.298-.828.442-1.18.432-.389-.01-1.135-.22-1.69-.4-.68-.22-1.22-.34-1.174-.71.024-.193.29-.39.798-.592 3.48-1.51 5.81-2.51 6.998-3.004 3.33-1.414 4.025-1.66 4.476-1.67.1 0 .321.023.465.14.12.096.154.22.17.31-.002.09-.002.29-.002.29z"/>
+                </svg>
+                Демо вход через Telegram
+              </button>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                Тестовый вход для демонстрации функционала
+              </p>
+            </div>
             
             {isLoading && (
               <div className="mt-4">
