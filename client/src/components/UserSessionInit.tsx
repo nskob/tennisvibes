@@ -9,21 +9,25 @@ export default function UserSessionInit() {
         if (response.ok) {
           const userData = await response.json();
           localStorage.setItem("user", JSON.stringify(userData));
-          // Reload the page to apply changes
-          window.location.reload();
+          console.log("User session initialized:", userData);
         }
       } catch (error) {
         console.error("Failed to initialize user session:", error);
       }
     };
 
-    // Check if we need to initialize
+    // Check current localStorage state
     const currentUser = localStorage.getItem("user");
-    const parsedUser = currentUser ? JSON.parse(currentUser) : null;
-    
-    // Initialize if no user or if user is not Nikita Skob
-    if (!parsedUser || parsedUser.id !== 13) {
+    if (!currentUser) {
       initializeUserSession();
+    } else {
+      const parsedUser = JSON.parse(currentUser);
+      console.log("Current user in localStorage:", parsedUser);
+      
+      // Ensure we have Nikita Skob's data
+      if (parsedUser.id !== 13) {
+        initializeUserSession();
+      }
     }
   }, []);
 

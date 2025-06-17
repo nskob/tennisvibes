@@ -17,6 +17,9 @@ export default function Home() {
     if (userData) {
       const user = JSON.parse(userData);
       setCurrentUserId(user.id);
+    } else {
+      // Fallback to user ID 13 (Nikita Skob)
+      setCurrentUserId(13);
     }
   }, []);
   
@@ -43,16 +46,6 @@ export default function Home() {
     queryKey: ["/api/coaches"],
   });
 
-  // Redirect to login if no user is found in localStorage
-  useEffect(() => {
-    if (currentUserId === null) {
-      const userData = localStorage.getItem("user");
-      if (!userData) {
-        setLocation("/login");
-      }
-    }
-  }, [currentUserId, setLocation]);
-
   if (isLoading || !currentUserId) {
     return (
       <div className="p-6 pt-12">
@@ -64,9 +57,19 @@ export default function Home() {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="p-6 pt-12">
+        <div className="text-center text-gray-500">
+          Загрузка профиля... (ID: {currentUserId})
+        </div>
+      </div>
+    );
+  }
 
-
+  console.log("User data:", user);
+  console.log("Current user ID:", currentUserId);
+  console.log("User name:", user?.name);
 
   const recentMatches = Array.isArray(matches) ? matches.slice(0, 3) : [];
   const recentTraining = Array.isArray(training) ? training.slice(0, 3) : [];
