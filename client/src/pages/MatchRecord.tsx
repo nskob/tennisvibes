@@ -17,6 +17,18 @@ interface MatchForm {
 export default function MatchRecord() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  // Get current user from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      setCurrentUserId(user.id);
+    } else {
+      setCurrentUserId(13); // Fallback to Nikita Skob
+    }
+  }, []);
   
   const [form, setForm] = useState<MatchForm>({
     opponentId: "",
@@ -72,6 +84,15 @@ export default function MatchRecord() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!currentUserId) {
+      toast({
+        title: "Ошибка",
+        description: "Пользователь не найден. Пожалуйста, войдите в систему.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!form.opponentId) {
       toast({
         title: "Ошибка",
@@ -97,10 +118,10 @@ export default function MatchRecord() {
     const player1SetsWon = validSets.filter(set => set.p1 > set.p2).length;
     const player2SetsWon = validSets.filter(set => set.p2 > set.p1).length;
     
-    const winner = player1SetsWon > player2SetsWon ? 1 : parseInt(form.opponentId);
+    const winner = player1SetsWon > player2SetsWon ? currentUserId : parseInt(form.opponentId);
 
     const matchData = {
-      player1Id: 1, // Current user
+      player1Id: currentUserId, // Current user
       player2Id: parseInt(form.opponentId),
       date: toISOString(form.date),
       sets: validSets,
@@ -138,7 +159,7 @@ export default function MatchRecord() {
     }
   };
 
-  const opponents = Array.isArray(users) ? users.filter((user: any) => user.id !== 1) : [];
+  const opponents = Array.isArray(users) ? users.filter((user: any) => user.id !== currentUserId) : [];
   
   const filteredOpponents = opponents.filter((opponent: any) =>
     opponent.name.toLowerCase().includes(searchQuery.toLowerCase())
