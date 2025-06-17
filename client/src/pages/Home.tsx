@@ -12,6 +12,13 @@ export default function Home() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const queryClient = useQueryClient();
   
+  const refreshStats = async () => {
+    if (currentUserId) {
+      await queryClient.invalidateQueries({ queryKey: [`/api/users/${currentUserId}`] });
+      await queryClient.invalidateQueries({ queryKey: [`/api/matches/user/${currentUserId}`] });
+    }
+  };
+  
   // Get current user from localStorage
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -24,34 +31,11 @@ export default function Home() {
     }
   }, []);
 
-  // Listen for localStorage changes (when user data is updated)
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        const user = JSON.parse(userData);
-        if (user.id !== currentUserId) {
-          setCurrentUserId(user.id);
-        }
-        // Refetch user data when localStorage changes
-        queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}`] });
-      }
-    };
 
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also listen for custom events when localStorage is updated from same tab
-    window.addEventListener('userDataUpdated', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('userDataUpdated', handleStorageChange);
-    };
-  }, [currentUserId, queryClient]);
   
   const { data: user, isLoading } = useQuery<User>({
     queryKey: [`/api/users/${currentUserId}`],
-    enabled: !!currentUserId, // Only run query when we have a user ID
+    enabled: !!currentUserId,
   });
 
   const { data: matches, isLoading: matchesLoading } = useQuery({
@@ -123,6 +107,12 @@ export default function Home() {
               className="text-gray-400 cursor-pointer hover:text-app-primary flex-shrink-0" 
               onClick={() => setLocation('/profile')}
             />
+            <button
+              onClick={refreshStats}
+              className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded"
+            >
+              ↻
+            </button>
           </div>
           <div className="text-xs sm:text-sm text-gray-400 mt-1 space-y-1">
             <div>Побед/Поражений: {user.wins}/{user.losses}</div>
