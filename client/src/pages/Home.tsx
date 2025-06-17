@@ -10,15 +10,15 @@ export default function Home() {
   const [, setLocation] = useLocation();
   
   const { data: user, isLoading } = useQuery<User>({
-    queryKey: ["/api/users/1"], // Main user ID is 1
+    queryKey: ["/api/users/4"], // Main user ID from database
   });
 
   const { data: matches, isLoading: matchesLoading } = useQuery({
-    queryKey: ["/api/matches/user/1"],
+    queryKey: ["/api/matches/user/4"],
   });
 
   const { data: training, isLoading: trainingLoading } = useQuery({
-    queryKey: ["/api/training/user/1"],
+    queryKey: ["/api/training/user/4"],
   });
 
   const { data: allUsers } = useQuery({
