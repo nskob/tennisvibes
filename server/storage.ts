@@ -14,6 +14,7 @@ export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByTelegramId(telegramId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
@@ -84,6 +85,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.username === username);
   }
 
+  async getUserByTelegramId(telegramId: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.telegramId === telegramId);
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
     const user: User = {
@@ -112,6 +117,13 @@ export class MemStorage implements IStorage {
       phone: insertUser.phone || null,
       email: insertUser.email || null,
       availability: insertUser.availability || null,
+      // Telegram fields
+      telegramId: insertUser.telegramId || null,
+      telegramUsername: insertUser.telegramUsername || null,
+      telegramFirstName: insertUser.telegramFirstName || null,
+      telegramLastName: insertUser.telegramLastName || null,
+      telegramPhotoUrl: insertUser.telegramPhotoUrl || null,
+      authProvider: insertUser.authProvider || "local",
       createdAt: new Date(),
     };
     this.users.set(id, user);

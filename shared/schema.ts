@@ -6,7 +6,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"),
   avatarUrl: text("avatar_url"),
   skillLevel: text("skill_level").default('3.0'),
   club: text("club"),
@@ -30,6 +30,13 @@ export const users = pgTable("users", {
   phone: text("phone"),
   email: text("email"),
   availability: text("availability"), // JSON string or simple text
+  // Telegram authentication fields
+  telegramId: text("telegram_id").unique(),
+  telegramUsername: text("telegram_username"),
+  telegramFirstName: text("telegram_first_name"),
+  telegramLastName: text("telegram_last_name"),
+  telegramPhotoUrl: text("telegram_photo_url"),
+  authProvider: text("auth_provider").default("local").notNull(), // 'local' or 'telegram'
   createdAt: timestamp("created_at").defaultNow(),
 });
 
