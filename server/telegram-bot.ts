@@ -67,9 +67,9 @@ export class TelegramBot {
       const newUser = await storage.createUser({
         name: `${telegramUser.first_name}${telegramUser.last_name ? ' ' + telegramUser.last_name : ''}`,
         username: telegramUser.username || `user_${telegramUser.id}`,
-        telegram_id: telegramUser.id.toString(),
-        telegram_username: telegramUser.username,
-        telegram_photo_url: '', // We'll get this from getProfilePhotos if needed
+        telegramId: telegramUser.id.toString(),
+        telegramUsername: telegramUser.username,
+        telegramPhotoUrl: '', // We'll get this from getProfilePhotos if needed
         isCoach: false,
       });
 

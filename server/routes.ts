@@ -410,6 +410,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Telegram webhook endpoint
+  app.post("/api/telegram/webhook", async (req, res) => {
+    try {
+      await telegramBot.handleUpdate(req.body);
+      res.status(200).json({ ok: true });
+    } catch (error) {
+      console.error('Telegram webhook error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
