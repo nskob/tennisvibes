@@ -212,6 +212,10 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getAllTraining(): Promise<Training[]> {
+    return Array.from(this.training.values());
+  }
+
   async createTraining(insertTraining: InsertTraining): Promise<Training> {
     const id = this.currentTrainingId++;
     const training: Training = {
@@ -444,6 +448,10 @@ export class DatabaseStorage implements IStorage {
 
   async getTrainingByUserId(userId: number): Promise<Training[]> {
     return await db.select().from(trainingTable).where(eq(trainingTable.userId, userId));
+  }
+
+  async getAllTraining(): Promise<Training[]> {
+    return await db.select().from(trainingTable);
   }
 
   async createTraining(insertTraining: InsertTraining): Promise<Training> {
