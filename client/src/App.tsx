@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Layout from "@/components/Layout";
 import Home from "@/pages/Home";
+import Login from "@/pages/Login";
 import MatchRecord from "@/pages/MatchRecord";
 import Players from "@/pages/Players";
 import PlayerProfile from "@/pages/PlayerProfile";
@@ -21,6 +22,7 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/login" component={Login} />
         <Route path="/home" component={Home} />
         <Route path="/match/new" component={MatchRecord} />
         <Route path="/players" component={Players} />
