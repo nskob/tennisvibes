@@ -157,7 +157,6 @@ export default function Home() {
                       <ProfileCard 
                         name={opponent.name} 
                         user={opponent} 
-                        level={opponent.skillLevel ? opponent.skillLevel : undefined} 
                         size="sm" 
                       />
                     )}
