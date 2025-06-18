@@ -126,6 +126,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Avatar proxy endpoint for Telegram avatars
+  app.get("/api/avatar-proxy/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.telegramPhotoUrl) {
+        return res.status(404).json({ message: "User or Telegram photo not found" });
+      }
+
+      // Check if we already have a cached local copy
+      const cachedFileName = `telegram-${userId}-${Date.now()}.jpg`;
+      const cachedPath = path.join(process.cwd(), 'uploads', 'avatars', cachedFileName);
+      
+      try {
+        // Download the Telegram photo
+        const fetch = (await import('node-fetch')).default;
+        const response = await fetch(user.telegramPhotoUrl);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch Telegram photo');
+        }
+
+        const buffer = await response.buffer();
+        
+        // Save to local cache
+        fs.writeFileSync(cachedPath, buffer);
+        
+        // Update user's avatarUrl to point to local cached copy
+        const localAvatarUrl = `/uploads/avatars/${cachedFileName}`;
+        await storage.updateUser(userId, { avatarUrl: localAvatarUrl });
+        
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+        res.send(buffer);
+        
+      } catch (error) {
+        console.error('Error downloading Telegram avatar:', error);
+        res.status(500).json({ message: "Failed to proxy avatar" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Avatar proxy error", error });
+    }
+  });
+
   // Matches
   app.get("/api/matches/:id", async (req, res) => {
     const id = parseInt(req.params.id);
@@ -370,11 +415,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!user) {
         // Create new user from Telegram data
+        let localAvatarUrl = null;
+        
+        // Download and cache Telegram avatar locally
+        if (authData.photo_url) {
+          try {
+            const fetch = (await import('node-fetch')).default;
+            const response = await fetch(authData.photo_url);
+            
+            if (response.ok) {
+              const buffer = await response.buffer();
+              const fileName = `telegram-${authData.id}-${Date.now()}.jpg`;
+              const filePath = path.join(process.cwd(), 'uploads', 'avatars', fileName);
+              
+              fs.writeFileSync(filePath, buffer);
+              localAvatarUrl = `/uploads/avatars/${fileName}`;
+            }
+          } catch (error) {
+            console.warn('Failed to cache Telegram avatar during user creation:', error);
+          }
+        }
+        
         const newUserData = {
           name: `${authData.first_name || ''} ${authData.last_name || ''}`.trim() || authData.username || `User${authData.id}`,
           username: authData.username || `tg_${authData.id}`,
           password: null,
-          avatarUrl: authData.photo_url || null,
+          avatarUrl: localAvatarUrl || authData.photo_url || null,
           telegramId: authData.id,
           telegramUsername: authData.username,
           telegramFirstName: authData.first_name,
@@ -403,10 +469,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           telegramPhotoUrl: authData.photo_url,
         };
         
-        // Always update avatarUrl with Telegram photo if available
-        // This ensures the latest Telegram photo is used
-        if (authData.photo_url) {
-          updates.avatarUrl = authData.photo_url;
+        // Download and cache new Telegram avatar if it has changed
+        if (authData.photo_url && authData.photo_url !== user.telegramPhotoUrl) {
+          try {
+            const fetch = (await import('node-fetch')).default;
+            const response = await fetch(authData.photo_url);
+            
+            if (response.ok) {
+              const buffer = await response.buffer();
+              const fileName = `telegram-${authData.id}-${Date.now()}.jpg`;
+              const filePath = path.join(process.cwd(), 'uploads', 'avatars', fileName);
+              
+              // Delete old cached avatar if it exists and is a telegram avatar
+              if (user.avatarUrl && user.avatarUrl.includes('telegram-')) {
+                const oldPath = path.join(process.cwd(), user.avatarUrl);
+                if (fs.existsSync(oldPath)) {
+                  fs.unlinkSync(oldPath);
+                }
+              }
+              
+              fs.writeFileSync(filePath, buffer);
+              updates.avatarUrl = `/uploads/avatars/${fileName}`;
+            }
+          } catch (error) {
+            console.warn('Failed to cache updated Telegram avatar:', error);
+            // Fallback to direct URL if caching fails
+            updates.avatarUrl = authData.photo_url;
+          }
         }
 
         user = await storage.updateUser(user.id, updates) || user;

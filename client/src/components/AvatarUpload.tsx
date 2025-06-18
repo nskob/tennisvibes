@@ -133,13 +133,19 @@ export default function AvatarUpload({ user, size = "md", showUploadButton = fal
               const target = e.target as HTMLImageElement;
               const currentSrc = target.src;
               
-              // First fallback: try Telegram photo without cache busting
+              // First fallback: try avatar proxy for Telegram users
+              if (user.telegramPhotoUrl && !currentSrc.includes('/api/avatar-proxy/')) {
+                target.src = `/api/avatar-proxy/${user.id}`;
+                return;
+              }
+              
+              // Second fallback: try original Telegram photo
               if (user.telegramPhotoUrl && !currentSrc.includes(user.telegramPhotoUrl.split('?')[0])) {
                 target.src = user.telegramPhotoUrl;
                 return;
               }
               
-              // Second fallback: try main avatar without cache busting
+              // Third fallback: try main avatar without cache busting
               if (user.avatarUrl && currentSrc.includes('?v=') && !currentSrc.includes(user.avatarUrl.split('?')[0])) {
                 target.src = user.avatarUrl;
                 return;
