@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "start": "NODE_ENV=production tsx server/index.ts",
+    "build": "echo 'No build step required for this setup'",
+    "db:deploy": "drizzle-kit push"
+  }
+}
