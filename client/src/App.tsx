@@ -8,6 +8,7 @@ import UserSessionInit from "@/components/UserSessionInit";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import MatchRecord from "@/pages/MatchRecord";
+import MatchDetail from "@/pages/MatchDetail";
 import Players from "@/pages/Players";
 import PlayerProfile from "@/pages/PlayerProfile";
 import Training from "@/pages/Training";
@@ -26,6 +27,7 @@ function Router() {
         <Route path="/login" component={Login} />
         <Route path="/home" component={Home} />
         <Route path="/match/new" component={MatchRecord} />
+        <Route path="/match/:id" component={MatchDetail} />
         <Route path="/players" component={Players} />
         <Route path="/player/:id" component={PlayerProfile} />
         <Route path="/training-checkin" component={Training} />

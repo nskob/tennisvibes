@@ -134,23 +134,26 @@ export default function Home() {
               const opponent = Array.isArray(allUsers) ? allUsers.find((u: any) => u.id === opponentId) : null;
               
               return (
-                <div key={match.id} className="flex items-center gap-2 py-2">
+                <div 
+                  key={match.id} 
+                  className="flex items-center gap-2 py-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2"
+                  onClick={() => setLocation(`/match/${match.id}`)}
+                >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <span className="text-app-text text-sm">vs</span>
                     {opponent && (
                       <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
                     )}
                     <span 
-                      className="cursor-pointer hover:underline text-sm truncate"
+                      className="text-sm truncate"
                       style={{ color: '#2563eb' }}
-                      onClick={() => setLocation(`/player/${opponentId}`)}
                     >
                       {opponentName}
                     </span>
                   </div>
                   <div className="flex flex-col items-end gap-1 text-sm flex-shrink-0">
-                    <span className={`font-mono text-xs ${match.winner === user.id ? 'text-green-600' : 'text-red-500'}`}>
-                      {formatMatchScore(match.sets)}
+                    <span className={`text-xs font-medium ${match.winner === user.id ? 'text-green-600' : 'text-red-500'}`}>
+                      {match.winner === user.id ? 'Победа' : 'Поражение'}
                     </span>
                     <span className="text-gray-400 text-xs">{formatMatchDate(match.createdAt || match.date)}</span>
                   </div>

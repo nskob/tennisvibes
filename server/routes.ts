@@ -127,6 +127,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Matches
+  app.get("/api/matches/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+      const match = await storage.getMatch(id);
+      if (!match) {
+        return res.status(404).json({ message: "Match not found" });
+      }
+      res.json(match);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid match ID", error });
+    }
+  });
+
   app.get("/api/matches/user/:userId", async (req, res) => {
     const userId = parseInt(req.params.userId);
     const matches = await storage.getMatchesByUserId(userId);
