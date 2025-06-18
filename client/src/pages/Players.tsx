@@ -140,18 +140,18 @@ export default function Players() {
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="all" className="flex items-center gap-1 text-xs px-2 py-1">
+        <TabsList className="grid w-full grid-cols-2 mb-6 h-auto p-1">
+          <TabsTrigger value="all" className="flex items-center justify-center gap-1 text-xs px-3 py-2 h-auto">
             <Users className="w-3 h-3" />
             Все игроки ({allPlayers.length})
           </TabsTrigger>
-          <TabsTrigger value="coaches" className="flex items-center gap-1 text-xs px-2 py-1">
+          <TabsTrigger value="coaches" className="flex items-center justify-center gap-1 text-xs px-3 py-2 h-auto">
             <Award className="w-3 h-3" />
             Тренеры ({filteredCoaches.length})
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="all">
+        <TabsContent value="all" className="mt-6">
           <div className="space-y-4">
             {allPlayers.map((player) => (
               <PlayerCard key={player.id} player={player} />
@@ -171,7 +171,7 @@ export default function Players() {
           </div>
         </TabsContent>
         
-        <TabsContent value="coaches">
+        <TabsContent value="coaches" className="mt-6">
           <div className="space-y-4">
             {filteredCoaches.map((coach) => (
               <PlayerCard key={coach.id} player={coach} />
