@@ -102,14 +102,52 @@ export default function AvatarUpload({ user, size = "md", showUploadButton = fal
       .slice(0, 2);
   };
 
+  // Try to get the best available avatar URL
+  const getAvatarUrl = () => {
+    // First try the main avatar URL
+    if (user.avatarUrl) {
+      // If it's a Telegram URL, add cache-busting and cross-origin handling
+      if (user.avatarUrl.includes('telegram.org') || user.avatarUrl.includes('t.me')) {
+        return user.avatarUrl + '?v=' + Date.now();
+      }
+      return user.avatarUrl;
+    }
+    // Fallback to Telegram photo URL if available
+    if (user.telegramPhotoUrl) {
+      return user.telegramPhotoUrl + '?v=' + Date.now();
+    }
+    return undefined;
+  };
+
   return (
     <div className="flex items-center gap-3">
       <div className="relative">
         <Avatar className={sizeClasses[size]}>
           <AvatarImage 
-            src={user.avatarUrl || undefined} 
+            src={getAvatarUrl()} 
             alt={user.name}
             className="object-cover"
+            crossOrigin="anonymous"
+            onError={(e) => {
+              // If primary avatar fails, try alternative sources
+              const target = e.target as HTMLImageElement;
+              const currentSrc = target.src;
+              
+              // First fallback: try Telegram photo without cache busting
+              if (user.telegramPhotoUrl && !currentSrc.includes(user.telegramPhotoUrl.split('?')[0])) {
+                target.src = user.telegramPhotoUrl;
+                return;
+              }
+              
+              // Second fallback: try main avatar without cache busting
+              if (user.avatarUrl && currentSrc.includes('?v=') && !currentSrc.includes(user.avatarUrl.split('?')[0])) {
+                target.src = user.avatarUrl;
+                return;
+              }
+              
+              // Final fallback: hide the image and show initials
+              target.style.display = 'none';
+            }}
           />
           <AvatarFallback className="bg-cream-200 text-dark-brown font-medium">
             {getInitials(user.name || "User")}

@@ -403,7 +403,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           telegramPhotoUrl: authData.photo_url,
         };
         
-        if (authData.photo_url && !user.avatarUrl) {
+        // Always update avatarUrl with Telegram photo if available
+        // This ensures the latest Telegram photo is used
+        if (authData.photo_url) {
           updates.avatarUrl = authData.photo_url;
         }
 
