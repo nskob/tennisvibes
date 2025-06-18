@@ -5,7 +5,7 @@ export default function UserSessionInit() {
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
-    // Clear invalid user session and redirect to login
+    // Handle user session validation and routing
     const validateUserSession = async () => {
       try {
         const currentUser = localStorage.getItem("user");
@@ -14,16 +14,23 @@ export default function UserSessionInit() {
           
           // Verify user still exists in database
           const response = await fetch(`/api/users/${parsedUser.id}`);
-          if (!response.ok) {
+          if (response.ok) {
+            // User exists and is valid
+            if (location === "/login" || location === "/") {
+              setLocation("/home");
+            }
+          } else {
             // User doesn't exist, clear session and redirect to login
             localStorage.removeItem("user");
             if (location !== "/login") {
               setLocation("/login");
             }
           }
-        } else if (location !== "/login") {
-          // No user session, redirect to login
-          setLocation("/login");
+        } else {
+          // No user session, redirect to login only if not already there
+          if (location !== "/login") {
+            setLocation("/login");
+          }
         }
       } catch (error) {
         console.error("Failed to validate user session:", error);
