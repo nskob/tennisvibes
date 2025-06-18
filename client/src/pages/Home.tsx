@@ -107,12 +107,6 @@ export default function Home() {
               className="text-gray-400 cursor-pointer hover:text-app-primary flex-shrink-0" 
               onClick={() => setLocation('/profile')}
             />
-            <button
-              onClick={refreshStats}
-              className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded"
-            >
-              ↻
-            </button>
           </div>
           <div className="text-xs sm:text-sm text-gray-400 mt-1 space-y-1">
             <div>Побед/Поражений: {user.wins}/{user.losses}</div>
@@ -140,7 +134,7 @@ export default function Home() {
               const opponent = Array.isArray(allUsers) ? allUsers.find((u: any) => u.id === opponentId) : null;
               
               return (
-                <div key={match.id} className="flex items-center justify-between py-2">
+                <div key={match.id} className="flex items-center gap-2 py-2">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <span className="text-app-text text-sm">vs</span>
                     {opponent && (
@@ -154,11 +148,11 @@ export default function Home() {
                       {opponentName}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className={`font-mono ${match.winner === user.id ? 'text-green-600' : 'text-red-500'}`}>
+                  <div className="flex flex-col items-end gap-1 text-sm flex-shrink-0">
+                    <span className={`font-mono text-xs ${match.winner === user.id ? 'text-green-600' : 'text-red-500'}`}>
                       {formatMatchScore(match.sets)}
                     </span>
-                    <span className="text-gray-400">{formatMatchDate(match.createdAt || match.date)}</span>
+                    <span className="text-gray-400 text-xs">{formatMatchDate(match.createdAt || match.date)}</span>
                   </div>
                 </div>
               );
