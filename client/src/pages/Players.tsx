@@ -125,78 +125,72 @@ export default function Players() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-none p-4 pt-12">
-        <h1 className="text-2xl mb-4">Игроки</h1>
-        
-        {/* Search */}
-        <div className="mb-4">
-          <Input
-            type="text"
-            placeholder="Поиск игроков..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-app-secondary text-app-text border-none"
-          />
-        </div>
-
-        {/* Fixed tab bar */}
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-10 mb-4">
-            <TabsTrigger value="all" className="flex items-center gap-1 text-sm px-3 py-2">
-              <Users className="w-4 h-4" />
-              Все игроки ({allPlayers.length})
-            </TabsTrigger>
-            <TabsTrigger value="coaches" className="flex items-center gap-1 text-sm px-3 py-2">
-              <Award className="w-4 h-4" />
-              Тренеры ({filteredCoaches.length})
-            </TabsTrigger>
-          </TabsList>
-          
-          {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto pb-24">
-            <TabsContent value="all" className="mt-4">
-              <div className="space-y-3">
-                {allPlayers.map((player) => (
-                  <PlayerCard key={player.id} player={player} />
-                ))}
-                
-                {allPlayers.length === 0 && (
-                  <div className="text-center text-gray-400 py-8">
-                    <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <div className="text-lg font-medium mb-2">
-                      {searchTerm ? "Игроки не найдены" : "Нет игроков"}
-                    </div>
-                    <div className="text-sm">
-                      {searchTerm ? "Попробуйте изменить поисковый запрос" : "Пока нет зарегистрированных игроков"}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="coaches" className="mt-4">
-              <div className="space-y-3">
-                {filteredCoaches.map((coach) => (
-                  <PlayerCard key={coach.id} player={coach} />
-                ))}
-                
-                {filteredCoaches.length === 0 && (
-                  <div className="text-center text-gray-400 py-8">
-                    <Award className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <div className="text-lg font-medium mb-2">
-                      {searchTerm ? "Тренеры не найдены" : "Нет тренеров"}
-                    </div>
-                    <div className="text-sm">
-                      {searchTerm ? "Попробуйте изменить поисковый запрос" : "Пока нет зарегистрированных тренеров"}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          </div>
-        </Tabs>
+    <div className="p-4 pt-12 pb-20">
+      <h1 className="text-2xl mb-4">Игроки</h1>
+      
+      {/* Search */}
+      <div className="mb-4">
+        <Input
+          type="text"
+          placeholder="Поиск игроков..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full bg-app-secondary text-app-text border-none"
+        />
       </div>
+
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsTrigger value="all" className="flex items-center gap-1 text-xs px-2 py-1">
+            <Users className="w-3 h-3" />
+            Все игроки ({allPlayers.length})
+          </TabsTrigger>
+          <TabsTrigger value="coaches" className="flex items-center gap-1 text-xs px-2 py-1">
+            <Award className="w-3 h-3" />
+            Тренеры ({filteredCoaches.length})
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="all">
+          <div className="space-y-4">
+            {allPlayers.map((player) => (
+              <PlayerCard key={player.id} player={player} />
+            ))}
+            
+            {allPlayers.length === 0 && (
+              <div className="text-center text-gray-400 py-8">
+                <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <div className="text-lg font-medium mb-2">
+                  {searchTerm ? "Игроки не найдены" : "Нет игроков"}
+                </div>
+                <div className="text-sm">
+                  {searchTerm ? "Попробуйте изменить поисковый запрос" : "Пока нет зарегистрированных игроков"}
+                </div>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="coaches">
+          <div className="space-y-4">
+            {filteredCoaches.map((coach) => (
+              <PlayerCard key={coach.id} player={coach} />
+            ))}
+            
+            {filteredCoaches.length === 0 && (
+              <div className="text-center text-gray-400 py-8">
+                <Award className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <div className="text-lg font-medium mb-2">
+                  {searchTerm ? "Тренеры не найдены" : "Нет тренеров"}
+                </div>
+                <div className="text-sm">
+                  {searchTerm ? "Попробуйте изменить поисковый запрос" : "Пока нет зарегистрированных тренеров"}
+                </div>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
