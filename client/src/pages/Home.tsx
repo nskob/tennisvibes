@@ -108,7 +108,7 @@ export default function Home() {
         <ProfileCard 
           name={user.name} 
           user={user} 
-          level={user.skillLevel} 
+          level={user.skillLevel ? user.skillLevel : undefined} 
           size="lg" 
         />
         <div className="flex-1 min-w-0">
@@ -157,7 +157,7 @@ export default function Home() {
                       <ProfileCard 
                         name={opponent.name} 
                         user={opponent} 
-                        level={opponent.skillLevel} 
+                        level={opponent.skillLevel ? opponent.skillLevel : undefined} 
                         size="sm" 
                       />
                     )}
