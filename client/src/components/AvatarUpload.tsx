@@ -140,13 +140,17 @@ export default function AvatarUpload({ user, size = "md", showUploadButton = fal
         
         {showLevelBadge && user.skillLevel && (
           <div
-            className="absolute -bottom-1 -right-1 rounded-full font-bold text-xs border-2 border-white"
+            className="absolute -bottom-1 -right-1 rounded-full font-medium text-xs border shadow-sm"
             style={{
-              background: "#ffd700",
-              color: "#222",
+              background: "#f8f9fa",
+              color: "#374151",
+              border: "1px solid #d1d5db",
               padding: "4px 8px",
-              minWidth: "24px",
-              textAlign: "center"
+              minWidth: "20px",
+              textAlign: "center",
+              fontSize: "0.75rem",
+              fontWeight: "600",
+              boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
             }}
           >
             {user.skillLevel}
