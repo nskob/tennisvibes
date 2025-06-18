@@ -1,25 +1,54 @@
 import { useQuery } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import AvatarUpload from "@/components/AvatarUpload";
+import { getCurrentUser } from "@/lib/auth";
+import { useLocation } from "wouter";
+import { useEffect, useState } from "react";
 
 export default function Profile() {
-  const { data: user, isLoading } = useQuery<User>({
-    queryKey: ["/api/users/1"], // Main user ID is 1
+  const [, setLocation] = useLocation();
+  const [currentUser, setCurrentUser] = useState(getCurrentUser());
+
+  useEffect(() => {
+    if (!currentUser) {
+      setLocation("/login");
+    }
+  }, [currentUser, setLocation]);
+
+  const { data: user, isLoading, error } = useQuery<User>({
+    queryKey: ["/api/users", currentUser?.id],
+    enabled: !!currentUser?.id,
   });
+
+  if (!currentUser) {
+    return null; // Will redirect to login
+  }
 
   if (isLoading) {
     return (
       <div className="p-6 pt-12">
-        <div className="animate-pulse">
-          <div className="w-24 h-24 bg-app-secondary rounded-full mx-auto mb-4"></div>
-          <div className="h-8 bg-app-secondary rounded mb-2"></div>
-          <div className="h-4 bg-app-secondary rounded mb-8"></div>
+        <div className="text-center text-gray-500">
+          Загрузка профиля... (ID: {currentUser.id})
         </div>
       </div>
     );
   }
 
-  if (!user) return null;
+  if (error || !user) {
+    return (
+      <div className="p-6 pt-12">
+        <div className="text-center text-red-500">
+          Ошибка загрузки профиля. 
+          <button 
+            onClick={() => setLocation("/login")} 
+            className="block mt-2 text-app-primary underline"
+          >
+            Войти заново
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 pt-12">

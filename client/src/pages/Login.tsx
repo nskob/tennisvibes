@@ -259,7 +259,38 @@ export default function Login() {
           <div className="text-center">
             <Button
               variant="outline"
-              onClick={() => setLocation("/home")}
+              onClick={async () => {
+                try {
+                  // Use the first available user from the database
+                  const response = await fetch('/api/users');
+                  const users = await response.json();
+                  
+                  if (users && users.length > 0) {
+                    const demoUser = users[0]; // Use first user as demo
+                    localStorage.setItem("user", JSON.stringify(demoUser));
+                    
+                    toast({
+                      title: "Демо режим",
+                      description: `Вход выполнен как ${demoUser.name}`,
+                    });
+                    
+                    setLocation("/home");
+                  } else {
+                    toast({
+                      title: "Ошибка",
+                      description: "Нет доступных пользователей",
+                      variant: "destructive",
+                    });
+                  }
+                } catch (error) {
+                  console.error('Guest login error:', error);
+                  toast({
+                    title: "Ошибка входа",
+                    description: "Не удалось войти в демо режиме",
+                    variant: "destructive",
+                  });
+                }
+              }}
               className="w-full"
             >
               Продолжить как гость

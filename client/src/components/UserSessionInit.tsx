@@ -1,35 +1,41 @@
 import { useEffect } from "react";
+import { useLocation } from "wouter";
 
 export default function UserSessionInit() {
+  const [location, setLocation] = useLocation();
+
   useEffect(() => {
-    // Initialize session with Nikita Skob's data
-    const initializeUserSession = async () => {
+    // Clear invalid user session and redirect to login
+    const validateUserSession = async () => {
       try {
-        const response = await fetch('/api/users/13');
-        if (response.ok) {
-          const userData = await response.json();
-          localStorage.setItem("user", JSON.stringify(userData));
-          // Force page refresh to show updated profile photo
-          setTimeout(() => window.location.reload(), 500);
+        const currentUser = localStorage.getItem("user");
+        if (currentUser) {
+          const parsedUser = JSON.parse(currentUser);
+          
+          // Verify user still exists in database
+          const response = await fetch(`/api/users/${parsedUser.id}`);
+          if (!response.ok) {
+            // User doesn't exist, clear session and redirect to login
+            localStorage.removeItem("user");
+            if (location !== "/login") {
+              setLocation("/login");
+            }
+          }
+        } else if (location !== "/login") {
+          // No user session, redirect to login
+          setLocation("/login");
         }
       } catch (error) {
-        console.error("Failed to initialize user session:", error);
+        console.error("Failed to validate user session:", error);
+        localStorage.removeItem("user");
+        if (location !== "/login") {
+          setLocation("/login");
+        }
       }
     };
 
-    // Check current localStorage state
-    const currentUser = localStorage.getItem("user");
-    if (!currentUser) {
-      initializeUserSession();
-    } else {
-      const parsedUser = JSON.parse(currentUser);
-      
-      // Ensure we have Nikita Skob's data and check if avatar URL needs updating
-      if (parsedUser.id !== 13 || parsedUser.avatarUrl?.includes('profile_photos/file_1.jpg')) {
-        initializeUserSession();
-      }
-    }
-  }, []);
+    validateUserSession();
+  }, [location, setLocation]);
 
   return null;
 }
