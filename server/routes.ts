@@ -45,6 +45,9 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  
+  // Serve public files (including avatars)
+  app.use(express.static(path.join(process.cwd(), 'public')));
 
   // Users
   app.get("/api/users", async (req, res) => {
