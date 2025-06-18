@@ -27,6 +27,19 @@ export default function UserSessionInit() {
             }
           }
         } else {
+          // Check if there's a logged in Telegram user and auto-login
+          try {
+            const response = await fetch('/api/auth/telegram/latest');
+            const result = await response.json();
+            if (result.success && result.user) {
+              localStorage.setItem("user", JSON.stringify(result.user));
+              setLocation("/home");
+              return;
+            }
+          } catch (e) {
+            console.warn("Could not check for Telegram user:", e);
+          }
+          
           // No user session, redirect to login only if not already there
           if (location !== "/login") {
             setLocation("/login");
