@@ -11,9 +11,10 @@ interface AvatarUploadProps {
   user: User;
   size?: "sm" | "md" | "lg";
   showUploadButton?: boolean;
+  showLevelBadge?: boolean;
 }
 
-export default function AvatarUpload({ user, size = "md", showUploadButton = false }: AvatarUploadProps) {
+export default function AvatarUpload({ user, size = "md", showUploadButton = false, showLevelBadge = false }: AvatarUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
@@ -135,6 +136,21 @@ export default function AvatarUpload({ user, size = "md", showUploadButton = fal
           >
             <Camera className="h-3 w-3 text-dark-brown" />
           </button>
+        )}
+        
+        {showLevelBadge && user.skillLevel && (
+          <div
+            className="absolute -bottom-1 -right-1 rounded-full font-bold text-xs border-2 border-white"
+            style={{
+              background: "#ffd700",
+              color: "#222",
+              padding: "4px 8px",
+              minWidth: "24px",
+              textAlign: "center"
+            }}
+          >
+            {user.skillLevel}
+          </div>
         )}
       </div>
 

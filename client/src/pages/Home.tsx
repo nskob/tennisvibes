@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import AvatarUpload from "@/components/AvatarUpload";
+import ProfileCard from "@/components/ProfileCard";
 import { useLocation } from "wouter";
 import { Edit } from "lucide-react";
 import { formatMatchDate } from "@/lib/dateUtils";
@@ -104,7 +105,12 @@ export default function Home() {
     <div className="px-4 sm:px-6 pt-8 sm:pt-12 pb-24 max-w-md mx-auto">
       {/* Header */}
       <div className="mb-6 sm:mb-8 flex items-start gap-3 sm:gap-4">
-        <AvatarUpload user={user} size="md" showUploadButton={false} />
+        <ProfileCard 
+          name={user.name} 
+          user={user} 
+          level={user.skillLevel} 
+          size="lg" 
+        />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl text-app-text truncate">{user.name}</h1>
@@ -148,7 +154,12 @@ export default function Home() {
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <span className="text-app-text text-sm">vs</span>
                     {opponent && (
-                      <AvatarUpload user={opponent} size="sm" showUploadButton={false} />
+                      <ProfileCard 
+                        name={opponent.name} 
+                        user={opponent} 
+                        level={opponent.skillLevel} 
+                        size="sm" 
+                      />
                     )}
                     <span 
                       className="text-sm truncate"
