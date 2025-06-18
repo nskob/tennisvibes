@@ -102,19 +102,13 @@ export default function AvatarUpload({ user, size = "md", showUploadButton = fal
       .slice(0, 2);
   };
 
-  // Try to get the best available avatar URL
+  // Get avatar URL with proper fallback handling
   const getAvatarUrl = () => {
-    // First try the main avatar URL
     if (user.avatarUrl) {
-      // If it's a Telegram URL, add cache-busting and cross-origin handling
-      if (user.avatarUrl.includes('telegram.org') || user.avatarUrl.includes('t.me')) {
-        return user.avatarUrl + '?v=' + Date.now();
-      }
       return user.avatarUrl;
     }
-    // Fallback to Telegram photo URL if available
     if (user.telegramPhotoUrl) {
-      return user.telegramPhotoUrl + '?v=' + Date.now();
+      return user.telegramPhotoUrl;
     }
     return undefined;
   };
@@ -127,33 +121,6 @@ export default function AvatarUpload({ user, size = "md", showUploadButton = fal
             src={getAvatarUrl()} 
             alt={user.name}
             className="object-cover"
-            crossOrigin="anonymous"
-            onError={(e) => {
-              // If primary avatar fails, try alternative sources
-              const target = e.target as HTMLImageElement;
-              const currentSrc = target.src;
-              
-              // First fallback: try avatar proxy for Telegram users
-              if (user.telegramPhotoUrl && !currentSrc.includes('/api/avatar-proxy/')) {
-                target.src = `/api/avatar-proxy/${user.id}`;
-                return;
-              }
-              
-              // Second fallback: try original Telegram photo
-              if (user.telegramPhotoUrl && !currentSrc.includes(user.telegramPhotoUrl.split('?')[0])) {
-                target.src = user.telegramPhotoUrl;
-                return;
-              }
-              
-              // Third fallback: try main avatar without cache busting
-              if (user.avatarUrl && currentSrc.includes('?v=') && !currentSrc.includes(user.avatarUrl.split('?')[0])) {
-                target.src = user.avatarUrl;
-                return;
-              }
-              
-              // Final fallback: hide the image and show initials
-              target.style.display = 'none';
-            }}
           />
           <AvatarFallback className="bg-cream-200 text-dark-brown font-medium">
             {getInitials(user.name || "User")}

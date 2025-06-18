@@ -82,6 +82,12 @@ export default function Home() {
   const recentMatches = Array.isArray(matches) ? matches.slice(0, 3) : [];
   const recentTraining = Array.isArray(training) ? training.slice(0, 3) : [];
 
+  // Calculate statistics from actual matches data
+  const allMatches = Array.isArray(matches) ? matches : [];
+  const wins = allMatches.filter((match: any) => match.winner === user.id).length;
+  const losses = allMatches.filter((match: any) => match.winner !== user.id).length;
+  const totalMatches = allMatches.length;
+
   // Calculate recent form (last 5 matches)
   const lastFiveMatches = Array.isArray(matches) ? matches.slice(0, 5) : [];
   const form = lastFiveMatches.map((match: any) => 
@@ -109,8 +115,8 @@ export default function Home() {
             />
           </div>
           <div className="text-xs sm:text-sm text-gray-400 mt-1 space-y-1">
-            <div>Побед/Поражений: {user.wins}/{user.losses}</div>
-            <div>Матчей сыграно: {user.matchesPlayed} · Турниры: {user.tournamentsPlayed}</div>
+            <div>Побед/Поражений: {wins}/{losses}</div>
+            <div>Матчей сыграно: {totalMatches} · Турниры: 0</div>
           </div>
         </div>
       </div>
