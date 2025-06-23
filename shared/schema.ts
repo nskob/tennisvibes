@@ -16,20 +16,7 @@ export const users = pgTable("users", {
   losses: integer("losses").default(0),
   matchesPlayed: integer("matches_played").default(0),
   tournamentsPlayed: integer("tournaments_played").default(0),
-  serveProgress: integer("serve_progress").default(0),
-  backhandProgress: integer("backhand_progress").default(0),
-  enduranceProgress: integer("endurance_progress").default(0),
   achievements: text("achievements").array().default([]),
-  // Coach fields
-  isCoach: boolean("is_coach").default(false),
-  specialization: text("specialization"), // 'serve', 'backhand', 'fitness', 'mental', 'general'
-  experience: integer("experience"), // years of experience
-  rating: integer("rating"), // 1-5 star rating
-  hourlyRate: integer("hourly_rate"), // rate per hour in currency units
-  bio: text("bio"),
-  phone: text("phone"),
-  email: text("email"),
-  availability: text("availability"), // JSON string or simple text
   // Telegram authentication fields
   telegramId: text("telegram_id").unique(),
   telegramUsername: text("telegram_username"),
@@ -54,16 +41,7 @@ export const matches = pgTable("matches", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const training = pgTable("training", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  coach: text("coach"),
-  type: text("type").notNull(), // 'serve', 'backhand', 'physical', 'match'
-  duration: integer("duration").notNull(), // in minutes
-  date: timestamp("date").notNull(),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+
 
 export const tournaments = pgTable("tournaments", {
   id: serial("id").primaryKey(),
@@ -109,12 +87,7 @@ export const insertMatchSchema = createInsertSchema(matches).omit({
   status: z.string().optional().default("pending"),
 });
 
-export const insertTrainingSchema = createInsertSchema(training).omit({
-  id: true,
-  createdAt: true,
-}).extend({
-  date: z.string().transform((str) => new Date(str)),
-});
+
 
 export const insertTournamentSchema = createInsertSchema(tournaments).omit({
   id: true,
@@ -135,8 +108,7 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Match = typeof matches.$inferSelect;
 export type InsertMatch = z.infer<typeof insertMatchSchema>;
-export type Training = typeof training.$inferSelect;
-export type InsertTraining = z.infer<typeof insertTrainingSchema>;
+
 export type Tournament = typeof tournaments.$inferSelect;
 export type InsertTournament = z.infer<typeof insertTournamentSchema>;
 export type Ranking = typeof rankings.$inferSelect;

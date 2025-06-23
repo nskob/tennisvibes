@@ -1,8 +1,7 @@
 import { 
-  users, matches, training as trainingTable, tournaments, rankings, follows,
+  users, matches, tournaments, rankings, follows,
   type User, type InsertUser,
   type Match, type InsertMatch,
-  type Training, type InsertTraining,
   type Tournament, type InsertTournament,
   type Ranking, type InsertRanking,
   type Follow, type InsertFollow
@@ -26,11 +25,7 @@ export interface IStorage {
   createMatch(match: InsertMatch): Promise<Match>;
   updateMatch(id: number, updates: Partial<InsertMatch>): Promise<Match | undefined>;
   
-  // Training
-  getTraining(id: number): Promise<Training | undefined>;
-  getTrainingByUserId(userId: number): Promise<Training[]>;
-  getAllTraining(): Promise<Training[]>;
-  createTraining(training: InsertTraining): Promise<Training>;
+
   
   // Tournaments
   getTournament(id: number): Promise<Tournament | undefined>;
@@ -43,11 +38,7 @@ export interface IStorage {
   getAllRankings(): Promise<Ranking[]>;
   updateRanking(userId: number, rating: number): Promise<Ranking>;
   
-  // Coaches (users with isCoach=true)
-  getCoach(id: number): Promise<User | undefined>;
-  getAllCoaches(): Promise<User[]>;
-  createCoach(coach: Partial<InsertUser>): Promise<User>;
-  updateCoach(id: number, updates: Partial<InsertUser>): Promise<User | undefined>;
+
   
   // Follows
   getFollowsByUserId(userId: number): Promise<Follow[]>;
