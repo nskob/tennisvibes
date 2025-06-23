@@ -161,7 +161,7 @@ export class TelegramBot {
         
         const authText = `Добро пожаловать в Теннис Трекер! 🎾
 
-Аутентификация обрабатывается...
+Аутентификация успешна!
 
 Имя: ${userData.name}
 Username: @${userData.username || userData.telegramUsername}
