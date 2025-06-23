@@ -352,40 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Training
-  app.get("/api/training/user/:userId", async (req, res) => {
-    const userId = parseInt(req.params.userId);
-    const training = await storage.getTrainingByUserId(userId);
-    res.json(training);
-  });
 
-  app.get("/api/training/coach/:coachId", async (req, res) => {
-    try {
-      const coachId = parseInt(req.params.coachId);
-      const coach = await storage.getCoach(coachId);
-      if (!coach) {
-        return res.status(404).json({ message: "Coach not found" });
-      }
-      // Get training sessions where this coach is teaching
-      const allTraining = await storage.getAllTraining();
-      const coachTraining = allTraining.filter((session: any) => 
-        session.coach === coach.name
-      );
-      res.json(coachTraining);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch coach training", error });
-    }
-  });
-
-  app.post("/api/training", async (req, res) => {
-    try {
-      const trainingData = insertTrainingSchema.parse(req.body);
-      const training = await storage.createTraining(trainingData);
-      res.json(training);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid training data", error });
-    }
-  });
 
   // Tournaments
   app.get("/api/tournaments", async (req, res) => {
@@ -452,73 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Coaches
-  app.get("/api/coaches", async (req, res) => {
-    const coaches = await storage.getAllCoaches();
-    res.json(coaches);
-  });
 
-  app.get("/api/coaches/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const coach = await storage.getCoach(id);
-    
-    if (coach) {
-      res.json(coach);
-    } else {
-      res.status(404).json({ message: "Coach not found" });
-    }
-  });
-
-  app.post("/api/coaches", async (req, res) => {
-    try {
-      const validatedData = insertUserSchema.parse({
-        ...req.body,
-        isCoach: true
-      });
-      const coach = await storage.createCoach(validatedData);
-      res.json(coach);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid coach data", error });
-    }
-  });
-
-  app.patch("/api/coaches/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      const coach = await storage.updateCoach(id, updates);
-      
-      if (coach) {
-        res.json(coach);
-      } else {
-        res.status(404).json({ message: "Coach not found" });
-      }
-    } catch (error) {
-      res.status(400).json({ message: "Invalid update data", error });
-    }
-  });
-
-  // Coach avatar upload
-  app.post("/api/coaches/:id/avatar", upload.single('avatar'), async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      
-      if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
-      
-      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-      const coach = await storage.updateCoach(id, { avatarUrl });
-      
-      if (coach) {
-        res.json({ avatarUrl });
-      } else {
-        res.status(404).json({ message: "Coach not found" });
-      }
-    } catch (error) {
-      res.status(500).json({ message: "Avatar upload failed", error });
-    }
-  });
 
   // Telegram Authentication
   app.post("/api/auth/telegram", async (req, res) => {
