@@ -1,11 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { User } from "@shared/schema";
+import { User, Match, TrainingSession } from "@shared/schema";
 import AvatarUpload from "@/components/AvatarUpload";
 import ProfileCard from "@/components/ProfileCard";
 import { useLocation } from "wouter";
-import { Edit } from "lucide-react";
+import { Edit, Clock, Calendar, Plus, User as UserIcon } from "lucide-react";
 import { formatMatchDate } from "@/lib/dateUtils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 
 export default function Home() {
@@ -41,6 +43,11 @@ export default function Home() {
 
   const { data: matches, isLoading: matchesLoading } = useQuery({
     queryKey: [`/api/matches/user/${currentUserId}`],
+    enabled: !!currentUserId,
+  });
+
+  const { data: trainingSessions } = useQuery<TrainingSession[]>({
+    queryKey: [`/api/training-sessions/student/${currentUserId}`],
     enabled: !!currentUserId,
   });
 
