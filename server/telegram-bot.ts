@@ -236,6 +236,21 @@ Username: @${userData.username || userData.telegramUsername}
         // Edit the original message to show the result
         await this.editMessage(chatId, message.message_id, 
           `Матч ${statusText}!\n\nВы можете проверить обновлённую статистику в приложении.`);
+      } else if (data.startsWith('training_confirm_') || data.startsWith('training_reject_')) {
+        const [action, , trainingId] = data.split('_');
+        const status = action === 'training' && data.includes('confirm') ? 'confirmed' : 'rejected';
+        
+        // Update training status in database
+        await this.updateTrainingStatus(parseInt(trainingId), status);
+        
+        const statusText = status === 'confirmed' ? 'подтверждена' : 'отклонена';
+        
+        // Send confirmation message
+        await this.answerCallbackQuery(id, `Тренировка ${statusText}`);
+        
+        // Edit the original message to show the result
+        await this.editMessage(chatId, message.message_id, 
+          `Тренировка ${statusText}!\n\nВы можете проверить статус в приложении.`);
       }
     } catch (error: any) {
       console.error('Error handling callback query:', error);
@@ -274,6 +289,11 @@ Username: @${userData.username || userData.telegramUsername}
   async updateMatchStatus(matchId: number, status: string) {
     const { storage } = await import('./storage');
     await storage.updateMatch(matchId, { status });
+  }
+
+  async updateTrainingStatus(trainingId: number, status: string) {
+    const { storage } = await import('./storage');
+    await storage.updateTrainingSession(trainingId, { status });
   }
 
   async sendMatchNotification(matchId: number, player1Name: string, player2Name: string, score: string, recipientTelegramId: string) {
@@ -316,10 +336,58 @@ ${player1Name} vs ${player2Name}
     }
   }
 
+  async sendTrainingNotification(trainingId: number, studentName: string, trainerName: string, date: string, duration: number, recipientTelegramId: string) {
+    try {
+      console.log(`Attempting to send training notification to Telegram ID: ${recipientTelegramId}`);
+      
+      const text = `🏃‍♂️ Новая тренировка запланирована!
+
+${studentName} запросил тренировку
+Тренер: ${trainerName}
+Дата: ${date}
+Продолжительность: ${duration} минут
+
+Подтвердите тренировку:`;
+
+      const keyboard = {
+        inline_keyboard: [[
+          {
+            text: '✅ Подтвердить',
+            callback_data: `training_confirm_${trainingId}`
+          },
+          {
+            text: '❌ Отклонить',
+            callback_data: `training_reject_${trainingId}`
+          }
+        ]]
+      };
+
+      // Convert string to number if needed
+      const chatId = parseInt(recipientTelegramId);
+      
+      await this.sendMessage(chatId, text, keyboard);
+      console.log(`Training notification sent for training ${trainingId} to user ${recipientTelegramId}`);
+    } catch (error: any) {
+      if (error.message.includes('chat not found')) {
+        console.log(`Chat not found for user ${recipientTelegramId}. User needs to start the bot first.`);
+        // Store the pending notification for when the user starts the bot
+        await this.storePendingTrainingNotification(trainingId, recipientTelegramId, studentName, trainerName, date, duration);
+      } else {
+        console.error('Error sending training notification:', error.message);
+      }
+    }
+  }
+
   private async storePendingNotification(matchId: number, telegramId: string, player1Name: string, player2Name: string, score: string) {
     // For now, just log the pending notification
     // In a full implementation, you'd store this in the database
     console.log(`Stored pending notification for match ${matchId} to user ${telegramId}: ${player1Name} vs ${player2Name} (${score})`);
+  }
+
+  private async storePendingTrainingNotification(trainingId: number, telegramId: string, studentName: string, trainerName: string, date: string, duration: number) {
+    // For now, just log the pending notification
+    // In a full implementation, you'd store this in the database
+    console.log(`Stored pending training notification for training ${trainingId} to user ${telegramId}: ${studentName} training with ${trainerName} on ${date} (${duration} min)`);
   }
 
   async setWebhook(webhookUrl: string) {

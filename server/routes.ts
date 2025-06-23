@@ -776,6 +776,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { insertTrainingSessionSchema } = await import("@shared/schema");
       const validatedData = insertTrainingSessionSchema.parse(req.body);
       const session = await storage.createTrainingSession(validatedData);
+      
+      // Get student and trainer info for notification
+      const student = await storage.getUser(session.studentId);
+      const trainer = await storage.getUser(session.trainerId);
+      
+      if (student && trainer) {
+        // Send Telegram notification to trainer about new training request
+        let trainerTelegramId = trainer.telegramId;
+        
+        // Redirect Maria Sokolova notifications to Nikita Skob
+        if (trainer.name === "Maria Sokolova" || trainer.telegramId === "929433801") {
+          trainerTelegramId = "92943380"; // Nikita Skob's Telegram ID
+        }
+        
+        if (trainerTelegramId) {
+          try {
+            await telegramBot.sendTrainingNotification(
+              session.id,
+              student.name,
+              trainer.name,
+              new Date(session.date).toLocaleDateString('ru-RU'),
+              session.duration,
+              trainerTelegramId
+            );
+          } catch (telegramError) {
+            console.warn('Failed to send training notification:', telegramError);
+          }
+        }
+      }
+      
       res.json(session);
     } catch (error) {
       console.error("Error creating training session:", error);
