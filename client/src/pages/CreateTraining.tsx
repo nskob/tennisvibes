@@ -61,8 +61,8 @@ export default function CreateTraining() {
     },
     onSuccess: () => {
       toast({
-        title: "Тренировка создана",
-        description: "Запрос на тренировку отправлен тренеру",
+        title: "Тренировка записана",
+        description: "Тренировка отправлена на подтверждение тренеру",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/training-sessions"] });
       setLocation("/");
@@ -112,7 +112,7 @@ export default function CreateTraining() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            Запланировать тренировку
+            Записать тренировку
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -217,7 +217,7 @@ export default function CreateTraining() {
                 className="w-full"
                 disabled={createTrainingMutation.isPending}
               >
-                {createTrainingMutation.isPending ? "Создание..." : "Создать тренировку"}
+                {createTrainingMutation.isPending ? "Сохранение..." : "Записать тренировку"}
               </Button>
             </form>
           </Form>

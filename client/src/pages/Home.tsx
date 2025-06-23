@@ -184,39 +184,35 @@ export default function Home() {
           <Clock className="w-4 h-4" />
           Последние тренировки
         </h2>
-        {trainingSessions && trainingSessions.length > 0 ? (
+        {trainingSessions && trainingSessions.filter(session => session.status === 'confirmed').length > 0 ? (
           <div className="space-y-3">
-            {trainingSessions.slice(0, 3).map((session) => {
-              const trainer = Array.isArray(allUsers) ? allUsers.find((u: any) => u.id === session.trainerId) : null;
-              return (
-                <div key={session.id} className="flex items-center gap-2 py-2">
-                  {trainer && (
-                    <AvatarUpload user={trainer} size="sm" showUploadButton={false} />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">
-                      Тренировка с {trainer?.name || 'Unknown'}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <Calendar className="w-3 h-3" />
-                      <span>{formatMatchDate(session.date)}</span>
-                      <span>•</span>
-                      <Clock className="w-3 h-3" />
-                      <span>{session.duration} мин</span>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        session.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        session.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {session.status === 'completed' ? 'Завершена' :
-                         session.status === 'confirmed' ? 'Подтверждена' :
-                         'Ожидание'}
-                      </span>
+            {trainingSessions
+              .filter(session => session.status === 'confirmed')
+              .slice(0, 3)
+              .map((session) => {
+                const trainer = Array.isArray(allUsers) ? allUsers.find((u: any) => u.id === session.trainerId) : null;
+                return (
+                  <div 
+                    key={session.id} 
+                    className="flex items-center gap-2 py-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2"
+                    onClick={() => trainer && setLocation(`/player/${trainer.id}`)}
+                  >
+                    {trainer && (
+                      <AvatarUpload user={trainer} size="sm" showUploadButton={false} />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">
+                        Тренировка с {trainer?.name || 'Unknown'}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <span>{formatMatchDate(session.createdAt || session.date)}</span>
+                        <span>•</span>
+                        <span>{session.duration} мин</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         ) : (
           <div className="text-center text-gray-400 py-4">
@@ -232,7 +228,7 @@ export default function Home() {
             onClick={() => setLocation('/create-training')}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Запланировать тренировку
+            Записать тренировку
           </Button>
         </div>
       </div>

@@ -340,14 +340,14 @@ ${player1Name} vs ${player2Name}
     try {
       console.log(`Attempting to send training notification to Telegram ID: ${recipientTelegramId}`);
       
-      const text = `🏃‍♂️ Новая тренировка запланирована!
+      const text = `🏃‍♂️ Новая тренировка записана!
 
-${studentName} запросил тренировку
+${studentName} записал тренировку
 Тренер: ${trainerName}
 Дата: ${date}
 Продолжительность: ${duration} минут
 
-Подтвердите тренировку:`;
+Подтвердите результат тренировки:`;
 
       const keyboard = {
         inline_keyboard: [[
