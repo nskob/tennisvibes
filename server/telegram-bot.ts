@@ -26,6 +26,23 @@ interface TelegramUpdate {
     date: number;
     text: string;
   };
+  callback_query?: {
+    id: string;
+    from: {
+      id: number;
+      first_name: string;
+      last_name?: string;
+      username?: string;
+    };
+    message: {
+      message_id: number;
+      chat: {
+        id: number;
+        type: string;
+      };
+    };
+    data: string;
+  };
 }
 
 export class TelegramBot {
@@ -126,6 +143,12 @@ export class TelegramBot {
   }
 
   async handleUpdate(update: TelegramUpdate) {
+    // Handle callback queries (button presses)
+    if (update.callback_query) {
+      await this.handleCallbackQuery(update.callback_query);
+      return;
+    }
+
     if (!update.message) return;
 
     const { message } = update;
@@ -191,6 +214,95 @@ Username: @${userData.username || userData.telegramUsername}
     }
   }
 
+  async handleCallbackQuery(callbackQuery: any) {
+    const { id, data, from, message } = callbackQuery;
+    const chatId = message.chat.id;
+
+    try {
+      if (data.startsWith('match_confirm_') || data.startsWith('match_reject_')) {
+        const [action, , matchId] = data.split('_');
+        const status = action === 'match' && data.includes('confirm') ? 'confirmed' : 'rejected';
+        
+        // Update match status in database
+        await this.updateMatchStatus(parseInt(matchId), status);
+        
+        const statusText = status === 'confirmed' ? 'подтверждён' : 'отклонён';
+        
+        // Send confirmation message
+        await this.answerCallbackQuery(id, `Матч ${statusText}`);
+        
+        // Edit the original message to show the result
+        await this.editMessage(chatId, message.message_id, 
+          `Матч ${statusText}!\n\nВы можете проверить обновлённую статистику в приложении.`);
+      }
+    } catch (error: any) {
+      console.error('Error handling callback query:', error);
+      await this.answerCallbackQuery(id, 'Произошла ошибка');
+    }
+  }
+
+  async answerCallbackQuery(queryId: string, text?: string) {
+    await fetch(`${TELEGRAM_API_URL}/answerCallbackQuery`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        callback_query_id: queryId,
+        text,
+      }),
+    });
+  }
+
+  async editMessage(chatId: number, messageId: number, text: string) {
+    await fetch(`${TELEGRAM_API_URL}/editMessageText`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        message_id: messageId,
+        text,
+        parse_mode: 'HTML',
+      }),
+    });
+  }
+
+  async updateMatchStatus(matchId: number, status: string) {
+    const { storage } = await import('./storage');
+    await storage.updateMatch(matchId, { status });
+  }
+
+  async sendMatchNotification(matchId: number, player1Name: string, player2Name: string, score: string, recipientTelegramId: string) {
+    try {
+      const text = `🎾 Новый матч добавлен!
+
+${player1Name} vs ${player2Name}
+Счёт: ${score}
+
+Подтвердите результат матча:`;
+
+      const keyboard = {
+        inline_keyboard: [[
+          {
+            text: '✅ Подтвердить',
+            callback_data: `match_confirm_${matchId}`
+          },
+          {
+            text: '❌ Отклонить',
+            callback_data: `match_reject_${matchId}`
+          }
+        ]]
+      };
+
+      await this.sendMessage(parseInt(recipientTelegramId), text, keyboard);
+      console.log(`Match notification sent for match ${matchId} to user ${recipientTelegramId}`);
+    } catch (error: any) {
+      console.error('Error sending match notification:', error);
+    }
+  }
+
   async setWebhook(webhookUrl: string) {
     const response = await fetch(`${TELEGRAM_API_URL}/setWebhook`, {
       method: 'POST',
@@ -199,7 +311,7 @@ Username: @${userData.username || userData.telegramUsername}
       },
       body: JSON.stringify({
         url: webhookUrl,
-        allowed_updates: ['message'],
+        allowed_updates: ['message', 'callback_query'],
       }),
     });
 

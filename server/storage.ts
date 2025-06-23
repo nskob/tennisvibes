@@ -167,6 +167,7 @@ export class MemStorage implements IStorage {
       type: insertMatch.type,
       tournamentId: insertMatch.tournamentId || null,
       notes: insertMatch.notes || null,
+      status: insertMatch.status || "pending",
       createdAt: new Date(),
     };
     this.matches.set(id, match);

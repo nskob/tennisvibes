@@ -106,6 +106,7 @@ export const insertMatchSchema = createInsertSchema(matches).omit({
   date: z.union([z.string(), z.date()]).transform((val) => 
     typeof val === 'string' ? new Date(val) : val
   ),
+  status: z.string().optional().default("pending"),
 });
 
 export const insertTrainingSchema = createInsertSchema(training).omit({
