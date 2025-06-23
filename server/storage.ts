@@ -427,29 +427,12 @@ export class DatabaseStorage implements IStorage {
       .insert(matches)
       .values({
         ...insertMatch,
-        sets: insertMatch.sets as any
+        sets: insertMatch.sets as any,
+        status: 'pending' // All matches start as pending
       })
       .returning();
     
-    // Update user stats
-    const player1 = await this.getUser(insertMatch.player1Id);
-    const player2 = await this.getUser(insertMatch.player2Id);
-    
-    if (player1) {
-      await this.updateUser(player1.id, {
-        matchesPlayed: (player1.matchesPlayed || 0) + 1,
-        wins: insertMatch.winner === player1.id ? (player1.wins || 0) + 1 : player1.wins,
-        losses: insertMatch.winner !== player1.id ? (player1.losses || 0) + 1 : player1.losses,
-      });
-    }
-    
-    if (player2) {
-      await this.updateUser(player2.id, {
-        matchesPlayed: (player2.matchesPlayed || 0) + 1,
-        wins: insertMatch.winner === player2.id ? (player2.wins || 0) + 1 : player2.wins,
-        losses: insertMatch.winner !== player2.id ? (player2.losses || 0) + 1 : player2.losses,
-      });
-    }
+    // Do NOT update user stats on creation - only when confirmed
     
     return match;
   }
@@ -460,12 +443,43 @@ export class DatabaseStorage implements IStorage {
       updateFields.sets = updateFields.sets as any;
     }
     
+    // Get the current match first
+    const currentMatch = await this.getMatch(id);
+    if (!currentMatch) return undefined;
+    
     const [match] = await db
       .update(matches)
       .set(updateFields)
       .where(eq(matches.id, id))
       .returning();
+    
+    // If status changed to confirmed, update player statistics
+    if (updates.status === 'confirmed' && currentMatch.status !== 'confirmed') {
+      await this.updatePlayerStatsForMatch(match);
+    }
+    
     return match || undefined;
+  }
+
+  private async updatePlayerStatsForMatch(match: any) {
+    const player1 = await this.getUser(match.player1Id);
+    const player2 = await this.getUser(match.player2Id);
+    
+    if (player1) {
+      await this.updateUser(player1.id, {
+        matchesPlayed: (player1.matchesPlayed || 0) + 1,
+        wins: match.winner === player1.id ? (player1.wins || 0) + 1 : player1.wins,
+        losses: match.winner !== player1.id ? (player1.losses || 0) + 1 : player1.losses,
+      });
+    }
+    
+    if (player2) {
+      await this.updateUser(player2.id, {
+        matchesPlayed: (player2.matchesPlayed || 0) + 1,
+        wins: match.winner === player2.id ? (player2.wins || 0) + 1 : player2.wins,
+        losses: match.winner !== player2.id ? (player2.losses || 0) + 1 : player2.losses,
+      });
+    }
   }
 
   // Training

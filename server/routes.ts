@@ -206,9 +206,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = parseInt(req.params.userId);
     const matches = await storage.getMatchesByUserId(userId);
     
+    // Filter only confirmed matches for display in user statistics
+    const confirmedMatches = matches.filter(match => match.status === 'confirmed');
+    
     // Enrich matches with player names
     const enrichedMatches = await Promise.all(
-      matches.map(async (match) => {
+      confirmedMatches.map(async (match) => {
         const player1 = await storage.getUser(match.player1Id);
         const player2 = await storage.getUser(match.player2Id);
         return {
@@ -329,6 +332,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(match);
     } catch (error) {
       res.status(400).json({ message: "Invalid match data", error });
+    }
+  });
+
+  // Test endpoint to confirm matches
+  app.patch("/api/test/match/:id/confirm", async (req, res) => {
+    try {
+      const matchId = parseInt(req.params.id);
+      const match = await storage.updateMatch(matchId, { status: 'confirmed' });
+      
+      if (!match) {
+        return res.status(404).json({ message: "Match not found" });
+      }
+      
+      console.log(`Match ${matchId} confirmed via test endpoint`);
+      res.json({ message: "Match confirmed", match });
+    } catch (error) {
+      res.status(400).json({ message: "Failed to confirm match", error });
     }
   });
 
