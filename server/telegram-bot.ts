@@ -71,8 +71,8 @@ export class TelegramBot {
           await this.handleUpdate(update);
         }
       }
-    } catch (error) {
-      if (!error.message.includes('Conflict')) {
+    } catch (error: any) {
+      if (!error.message?.includes('Conflict')) {
         console.error('Error getting updates:', error);
       }
     }
@@ -100,7 +100,7 @@ export class TelegramBot {
     return crypto.createHmac('sha256', TELEGRAM_BOT_TOKEN).update(data).digest('hex');
   }
 
-  private async createWebAppUser(telegramUser: any) {
+  private async getOrCreateWebAppUser(telegramUser: any) {
     try {
       // Check if user already exists
       const existingUser = await storage.getUserByTelegramId(telegramUser.id.toString());
@@ -108,19 +108,19 @@ export class TelegramBot {
         return existingUser;
       }
 
-      // Create new user
-      const newUser = await storage.createUser({
+      // Don't create user here - let the web auth endpoint handle it
+      // Just return user data for processing
+      return {
+        telegramId: telegramUser.id.toString(),
         name: `${telegramUser.first_name}${telegramUser.last_name ? ' ' + telegramUser.last_name : ''}`,
         username: telegramUser.username || `user_${telegramUser.id}`,
-        telegramId: telegramUser.id.toString(),
         telegramUsername: telegramUser.username,
-        telegramPhotoUrl: '', // We'll get this from getProfilePhotos if needed
-        isCoach: false,
-      });
-
-      return newUser;
+        telegramFirstName: telegramUser.first_name,
+        telegramLastName: telegramUser.last_name,
+        isNewUser: true
+      };
     } catch (error) {
-      console.error('Error creating web app user:', error);
+      console.error('Error processing web app user:', error);
       throw error;
     }
   }
@@ -138,15 +138,33 @@ export class TelegramBot {
     try {
       if (text === '/start' || text?.startsWith('/start web_auth_')) {
         // Handle authentication for any /start command
-        const webAppUser = await this.createWebAppUser(user);
+        const userData = await this.getOrCreateWebAppUser(user);
+        
+        // Create authentication data that will be processed by the web endpoint
+        const authData = {
+          id: user.id.toString(),
+          first_name: user.first_name,
+          last_name: user.last_name,
+          username: user.username,
+          photo_url: '',
+          auth_date: Math.floor(Date.now() / 1000).toString(),
+          hash: 'bot_auth_hash'
+        };
+
+        // Store pending auth for web app to pick up
+        (global as any).pendingTelegramAuth = (global as any).pendingTelegramAuth || {};
+        (global as any).pendingTelegramAuth[user.id.toString()] = {
+          user: userData,
+          authData: authData,
+          timestamp: Date.now()
+        };
         
         const authText = `Добро пожаловать в Теннис Трекер! 🎾
 
-Аутентификация успешна!
+Аутентификация обрабатывается...
 
-Имя: ${webAppUser.name}
-ID: ${webAppUser.id}
-Username: @${webAppUser.username}
+Имя: ${userData.name}
+Username: @${userData.username || userData.telegramUsername}
 
 Теперь вернитесь в веб-приложение - вы автоматически войдете в систему.`;
 
@@ -161,35 +179,13 @@ Username: @${webAppUser.username}
 
         await this.sendMessage(chatId, authText, keyboard);
 
-        // Store the successful authentication in a way the web app can access
-        // For now, we'll create a simple auth endpoint
-        console.log(`User ${webAppUser.id} (${webAppUser.name}) authenticated via Telegram`);
-        
-        // Simulate successful telegram auth by creating auth data
-        const mockAuthData = {
-          id: user.id.toString(),
-          first_name: user.first_name,
-          last_name: user.last_name,
-          username: user.username,
-          photo_url: '',
-          auth_date: Math.floor(Date.now() / 1000).toString(),
-          hash: 'mock_hash_for_bot_auth'
-        };
-
-        // This would normally be handled by the Login Widget, but since we're using bot auth
-        // we need to provide an alternative way for the user to complete login
-        (global as any).pendingTelegramAuth = (global as any).pendingTelegramAuth || {};
-        (global as any).pendingTelegramAuth[user.id] = {
-          authData: mockAuthData,
-          user: webAppUser,
-          timestamp: Date.now()
-        };
+        console.log(`User ${userData.name} initiated Telegram authentication`);
 
       } else {
         // Default response
         await this.sendMessage(chatId, 'Отправьте /start для входа в приложение.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error handling Telegram update:', error);
       await this.sendMessage(chatId, 'Произошла ошибка. Попробуйте /start снова.');
     }
