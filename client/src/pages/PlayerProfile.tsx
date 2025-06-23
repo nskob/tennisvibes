@@ -77,12 +77,7 @@ export default function PlayerProfile() {
         </div>
         <div className="flex items-center justify-center gap-2 mb-2">
           <h1 className="text-2xl">{player.name}</h1>
-          {player.isCoach && (
-            <Badge variant="secondary">
-              <Award className="w-3 h-3 mr-1" />
-              Тренер
-            </Badge>
-          )}
+
         </div>
         <p className="text-gray-400 text-sm">
           {player.club || "Теннисист"}
