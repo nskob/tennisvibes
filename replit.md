@@ -117,13 +117,21 @@ A comprehensive tennis tracking application built as a full-stack web applicatio
 
 ## Recent Changes
 
-### Match Confirmation System (June 23, 2025)
-- Implemented Telegram notification system for match confirmations
-- Added inline keyboard buttons for match approval/rejection in Telegram
-- Created match status tracking (pending, confirmed, rejected)
-- Only confirmed matches now count in user statistics and appear in match lists
+### Match and Training Confirmation System (June 23, 2025)
+- Implemented Telegram notification system for match and training confirmations
+- Added inline keyboard buttons for match/training approval/rejection in Telegram
+- Created match and training status tracking (pending, confirmed, rejected)
+- Only confirmed matches count in user statistics and appear in match lists
 - All notifications for Maria Sokolova redirect to Nikita Skob's Telegram chat
-- Database persistence ensures match data survives server restarts
+- Database persistence ensures match and training data survives server restarts
+
+### Training and Review System (June 23, 2025)
+- Added comprehensive training session management with trainer selection
+- Implemented star-based review system (1-5 stars) with comments
+- Anonymous review option for privacy
+- Reviews displayed in player profiles with average ratings
+- Last training sessions shown on home page
+- Telegram notifications for training requests with confirmation workflow
 
 ### Technical Improvements
 - Switched from memory storage to PostgreSQL database with Drizzle ORM
