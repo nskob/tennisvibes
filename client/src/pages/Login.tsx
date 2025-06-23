@@ -214,7 +214,7 @@ export default function Login() {
             {/* Telegram Login Widget Container */}
             <div 
               id="telegram-login-container" 
-              className="flex justify-center min-h-[50px] items-center border border-gray-200 rounded-lg p-4 bg-[transparent]"
+              className="flex justify-center min-h-[50px] items-center rounded-lg p-4 bg-transparent"
             >
               <div className="text-sm text-gray-400">Загрузка виджета Telegram...</div>
             </div>
