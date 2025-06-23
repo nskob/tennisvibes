@@ -110,6 +110,8 @@ export const insertMatchSchema = createInsertSchema(matches).omit({
 export const insertTrainingSchema = createInsertSchema(training).omit({
   id: true,
   createdAt: true,
+}).extend({
+  date: z.string().transform((str) => new Date(str)),
 });
 
 export const insertTournamentSchema = createInsertSchema(tournaments).omit({
