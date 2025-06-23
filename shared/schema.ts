@@ -71,6 +71,29 @@ export const follows = pgTable("follows", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const trainingSessions = pgTable("training_sessions", {
+  id: serial("id").primaryKey(),
+  studentId: integer("student_id").notNull().references(() => users.id),
+  trainerId: integer("trainer_id").notNull().references(() => users.id),
+  date: timestamp("date").notNull(),
+  duration: integer("duration").notNull(), // в минутах
+  notes: text("notes"),
+  status: text("status").notNull().default("pending"), // pending, confirmed, completed
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const reviews = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  reviewerId: integer("reviewer_id").notNull().references(() => users.id),
+  reviewedId: integer("reviewed_id").notNull().references(() => users.id),
+  matchId: integer("match_id").references(() => matches.id),
+  trainingId: integer("training_id").references(() => trainingSessions.id),
+  rating: integer("rating").notNull(), // 1-5 звезд
+  comment: text("comment"),
+  isAnonymous: boolean("is_anonymous").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -103,15 +126,33 @@ export const insertFollowSchema = createInsertSchema(follows).omit({
   createdAt: true,
 });
 
+export const insertTrainingSessionSchema = createInsertSchema(trainingSessions).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  date: z.union([z.string(), z.date()]).transform((val) => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
+  status: z.string().optional().default("pending"),
+});
+
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Match = typeof matches.$inferSelect;
 export type InsertMatch = z.infer<typeof insertMatchSchema>;
-
 export type Tournament = typeof tournaments.$inferSelect;
 export type InsertTournament = z.infer<typeof insertTournamentSchema>;
 export type Ranking = typeof rankings.$inferSelect;
 export type InsertRanking = z.infer<typeof insertRankingSchema>;
 export type Follow = typeof follows.$inferSelect;
 export type InsertFollow = z.infer<typeof insertFollowSchema>;
+export type TrainingSession = typeof trainingSessions.$inferSelect;
+export type InsertTrainingSession = z.infer<typeof insertTrainingSessionSchema>;
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;

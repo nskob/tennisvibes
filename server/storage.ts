@@ -1,10 +1,12 @@
 import { 
-  users, matches, tournaments, rankings, follows,
+  users, matches, tournaments, rankings, follows, trainingSessions, reviews,
   type User, type InsertUser,
   type Match, type InsertMatch,
   type Tournament, type InsertTournament,
   type Ranking, type InsertRanking,
-  type Follow, type InsertFollow
+  type Follow, type InsertFollow,
+  type TrainingSession, type InsertTrainingSession,
+  type Review, type InsertReview
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, or, desc, and } from "drizzle-orm";
@@ -25,8 +27,6 @@ export interface IStorage {
   createMatch(match: InsertMatch): Promise<Match>;
   updateMatch(id: number, updates: Partial<InsertMatch>): Promise<Match | undefined>;
   
-
-  
   // Tournaments
   getTournament(id: number): Promise<Tournament | undefined>;
   getAllTournaments(): Promise<Tournament[]>;
@@ -38,13 +38,23 @@ export interface IStorage {
   getAllRankings(): Promise<Ranking[]>;
   updateRanking(userId: number, rating: number): Promise<Ranking>;
   
-
-  
   // Follows
   getFollowsByUserId(userId: number): Promise<Follow[]>;
   getFollowersByUserId(userId: number): Promise<Follow[]>;
   createFollow(follow: InsertFollow): Promise<Follow>;
   deleteFollow(followerId: number, followingId: number): Promise<boolean>;
+  
+  // Training Sessions
+  getTrainingSession(id: number): Promise<TrainingSession | undefined>;
+  getTrainingSessionsByStudentId(studentId: number): Promise<TrainingSession[]>;
+  getTrainingSessionsByTrainerId(trainerId: number): Promise<TrainingSession[]>;
+  createTrainingSession(training: InsertTrainingSession): Promise<TrainingSession>;
+  updateTrainingSession(id: number, updates: Partial<InsertTrainingSession>): Promise<TrainingSession | undefined>;
+  
+  // Reviews
+  getReview(id: number): Promise<Review | undefined>;
+  getReviewsByReviewedId(reviewedId: number): Promise<Review[]>;
+  createReview(review: InsertReview): Promise<Review>;
 }
 
 export class MemStorage implements IStorage {
