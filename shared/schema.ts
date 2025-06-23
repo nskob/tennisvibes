@@ -50,6 +50,7 @@ export const matches = pgTable("matches", {
   type: text("type").notNull(), // 'casual' or 'tournament' or 'rated'
   tournamentId: integer("tournament_id").references(() => tournaments.id),
   notes: text("notes"),
+  status: text("status").notNull().default("pending"), // 'pending', 'confirmed', 'rejected'
   createdAt: timestamp("created_at").defaultNow(),
 });
 
