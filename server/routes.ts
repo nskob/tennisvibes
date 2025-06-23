@@ -298,17 +298,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Determine who is the opponent (recipient of notification)
         const opponent = player1.id === matchData.winner ? player2 : player1;
         
-        if (opponent.telegramId) {
-          // Format score from sets
-          const score = matchData.sets.map((set: any) => `${set.p1}-${set.p2}`).join(', ');
-          
-          // Send notification to opponent
+        // Format score from sets
+        const score = matchData.sets.map((set: any) => `${set.p1}-${set.p2}`).join(', ');
+        
+        // Always redirect Maria's notifications to Nikita
+        let recipientTelegramId: string | null = null;
+        if (opponent.name === 'Мария Соколова') {
+          // Find Nikita Skob's telegram ID
+          const nikita = await storage.getUserByUsername('nskob');
+          if (nikita?.telegramId) {
+            recipientTelegramId = nikita.telegramId;
+            console.log(`Redirecting notification for ${opponent.name} to Nikita Skob`);
+          }
+        } else if (opponent.telegramId) {
+          recipientTelegramId = opponent.telegramId;
+        }
+        
+        // Send notification if we have a valid recipient
+        if (recipientTelegramId) {
           await telegramBot.sendMatchNotification(
             match.id,
             player1.name,
             player2.name,
             score,
-            opponent.telegramId
+            recipientTelegramId
           );
         }
       }

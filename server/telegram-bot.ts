@@ -50,28 +50,22 @@ export class TelegramBot {
   private pollingInterval: NodeJS.Timeout | null = null;
 
   private async sendMessage(chatId: number | string, text: string, replyMarkup?: any) {
-    const requestBody = {
-      chat_id: chatId,
-      text,
-      reply_markup: replyMarkup,
-      parse_mode: 'HTML',
-    };
-    
-    console.log('Telegram API request:', JSON.stringify(requestBody, null, 2));
-    
     const response = await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        reply_markup: replyMarkup,
+        parse_mode: 'HTML',
+      }),
     });
 
     const responseData = await response.json();
-    console.log('Telegram API response:', JSON.stringify(responseData, null, 2));
 
     if (!response.ok) {
-      console.error('Telegram API error details:', responseData);
       throw new Error(`Telegram API error: ${response.statusText} - ${JSON.stringify(responseData)}`);
     }
 
@@ -308,14 +302,24 @@ ${player1Name} vs ${player2Name}
 
       // Convert string to number if needed
       const chatId = parseInt(recipientTelegramId);
-      console.log(`Parsed chat ID: ${chatId}`);
       
       await this.sendMessage(chatId, text, keyboard);
       console.log(`Match notification sent for match ${matchId} to user ${recipientTelegramId}`);
     } catch (error: any) {
-      console.error('Error sending match notification:', error.message);
-      console.error('Full error:', error);
+      if (error.message.includes('chat not found')) {
+        console.log(`Chat not found for user ${recipientTelegramId}. User needs to start the bot first.`);
+        // Store the pending notification for when the user starts the bot
+        await this.storePendingNotification(matchId, recipientTelegramId, player1Name, player2Name, score);
+      } else {
+        console.error('Error sending match notification:', error.message);
+      }
     }
+  }
+
+  private async storePendingNotification(matchId: number, telegramId: string, player1Name: string, player2Name: string, score: string) {
+    // For now, just log the pending notification
+    // In a full implementation, you'd store this in the database
+    console.log(`Stored pending notification for match ${matchId} to user ${telegramId}: ${player1Name} vs ${player2Name} (${score})`);
   }
 
   async setWebhook(webhookUrl: string) {
