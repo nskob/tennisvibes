@@ -79,6 +79,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/users/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const updates = req.body;
+      const user = await storage.updateUser(userId, updates);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update user", error });
+    }
+  });
+
   app.put("/api/users/:id", async (req, res) => {
     const id = parseInt(req.params.id);
     try {
@@ -215,10 +229,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(enrichedMatches);
   });
 
+  // Get all matches with pagination
+  app.get("/api/matches/all", async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = (page - 1) * limit;
+
+      // Get all matches from storage (we'll implement pagination in memory for now)
+      const allMatches = await storage.getAllMatches();
+      
+      // Sort by creation date descending (newest first)
+      allMatches.sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.date).getTime();
+        const dateB = new Date(b.createdAt || b.date).getTime();
+        return dateB - dateA;
+      });
+
+      // Apply pagination
+      const paginatedMatches = allMatches.slice(offset, offset + limit);
+      
+      // Enrich with player names and status
+      const enrichedMatches = await Promise.all(
+        paginatedMatches.map(async (match) => {
+          const player1 = await storage.getUser(match.player1Id);
+          const player2 = await storage.getUser(match.player2Id);
+          
+          let statusText = "Ожидает подтверждения";
+          if (match.status === "confirmed") statusText = "Подтверждён";
+          else if (match.status === "rejected") statusText = "Отклонён";
+          
+          return {
+            ...match,
+            player1Name: player1?.name,
+            player2Name: player2?.name,
+            statusText,
+            score: match.sets.map((set: any) => `${set.p1}-${set.p2}`).join(', ')
+          };
+        })
+      );
+
+      res.json({
+        matches: enrichedMatches,
+        pagination: {
+          page,
+          limit,
+          total: allMatches.length,
+          totalPages: Math.ceil(allMatches.length / limit),
+          hasNext: page * limit < allMatches.length,
+          hasPrev: page > 1
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch matches", error });
+    }
+  });
+
   app.post("/api/matches", async (req, res) => {
     try {
       const matchData = insertMatchSchema.parse(req.body);
       const match = await storage.createMatch(matchData);
+      
+      // Send Telegram notification to the opponent
+      const player1 = await storage.getUser(matchData.player1Id);
+      const player2 = await storage.getUser(matchData.player2Id);
+      
+      if (player1 && player2) {
+        // Determine who is the opponent (recipient of notification)
+        const opponent = player1.id === matchData.winner ? player2 : player1;
+        
+        if (opponent.telegramId) {
+          // Format score from sets
+          const score = matchData.sets.map((set: any) => `${set.p1}-${set.p2}`).join(', ');
+          
+          // Send notification to opponent
+          await telegramBot.sendMatchNotification(
+            match.id,
+            player1.name,
+            player2.name,
+            score,
+            opponent.telegramId
+          );
+        }
+      }
+      
       res.json(match);
     } catch (error) {
       res.status(400).json({ message: "Invalid match data", error });

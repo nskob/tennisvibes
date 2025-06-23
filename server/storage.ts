@@ -22,6 +22,7 @@ export interface IStorage {
   // Matches
   getMatch(id: number): Promise<Match | undefined>;
   getMatchesByUserId(userId: number): Promise<Match[]>;
+  getAllMatches(): Promise<Match[]>;
   createMatch(match: InsertMatch): Promise<Match>;
   updateMatch(id: number, updates: Partial<InsertMatch>): Promise<Match | undefined>;
   
@@ -153,6 +154,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.matches.values()).filter(
       match => match.player1Id === userId || match.player2Id === userId
     );
+  }
+
+  async getAllMatches(): Promise<Match[]> {
+    return Array.from(this.matches.values());
   }
 
   async createMatch(insertMatch: InsertMatch): Promise<Match> {
@@ -411,6 +416,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(matches).where(
       or(eq(matches.player1Id, userId), eq(matches.player2Id, userId))
     );
+  }
+
+  async getAllMatches(): Promise<Match[]> {
+    return await db.select().from(matches);
   }
 
   async createMatch(insertMatch: InsertMatch): Promise<Match> {
