@@ -504,7 +504,60 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount || 0) > 0;
   }
 
+  // Training Sessions
+  async getTrainingSession(id: number): Promise<TrainingSession | undefined> {
+    const [session] = await db.select().from(trainingSessions).where(eq(trainingSessions.id, id));
+    return session || undefined;
+  }
 
+  async getTrainingSessionsByStudentId(studentId: number): Promise<TrainingSession[]> {
+    return await db.select().from(trainingSessions)
+      .where(eq(trainingSessions.studentId, studentId))
+      .orderBy(desc(trainingSessions.date));
+  }
+
+  async getTrainingSessionsByTrainerId(trainerId: number): Promise<TrainingSession[]> {
+    return await db.select().from(trainingSessions)
+      .where(eq(trainingSessions.trainerId, trainerId))
+      .orderBy(desc(trainingSessions.date));
+  }
+
+  async createTrainingSession(insertTraining: InsertTrainingSession): Promise<TrainingSession> {
+    const [session] = await db
+      .insert(trainingSessions)
+      .values(insertTraining)
+      .returning();
+    return session;
+  }
+
+  async updateTrainingSession(id: number, updates: Partial<InsertTrainingSession>): Promise<TrainingSession | undefined> {
+    const [session] = await db
+      .update(trainingSessions)
+      .set(updates)
+      .where(eq(trainingSessions.id, id))
+      .returning();
+    return session || undefined;
+  }
+
+  // Reviews
+  async getReview(id: number): Promise<Review | undefined> {
+    const [review] = await db.select().from(reviews).where(eq(reviews.id, id));
+    return review || undefined;
+  }
+
+  async getReviewsByReviewedId(reviewedId: number): Promise<Review[]> {
+    return await db.select().from(reviews)
+      .where(eq(reviews.reviewedId, reviewedId))
+      .orderBy(desc(reviews.createdAt));
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db
+      .insert(reviews)
+      .values(insertReview)
+      .returning();
+    return review;
+  }
 }
 
 export const storage = new DatabaseStorage();

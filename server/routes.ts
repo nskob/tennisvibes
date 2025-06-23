@@ -748,6 +748,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Training Sessions
+  app.get("/api/training-sessions/student/:studentId", async (req, res) => {
+    try {
+      const studentId = parseInt(req.params.studentId);
+      const sessions = await storage.getTrainingSessionsByStudentId(studentId);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching training sessions:", error);
+      res.status(500).json({ error: "Failed to fetch training sessions" });
+    }
+  });
+
+  app.get("/api/training-sessions/trainer/:trainerId", async (req, res) => {
+    try {
+      const trainerId = parseInt(req.params.trainerId);
+      const sessions = await storage.getTrainingSessionsByTrainerId(trainerId);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching training sessions:", error);
+      res.status(500).json({ error: "Failed to fetch training sessions" });
+    }
+  });
+
+  app.post("/api/training-sessions", async (req, res) => {
+    try {
+      const { insertTrainingSessionSchema } = await import("@shared/schema");
+      const validatedData = insertTrainingSessionSchema.parse(req.body);
+      const session = await storage.createTrainingSession(validatedData);
+      res.json(session);
+    } catch (error) {
+      console.error("Error creating training session:", error);
+      res.status(500).json({ error: "Failed to create training session" });
+    }
+  });
+
+  app.patch("/api/training-sessions/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const session = await storage.updateTrainingSession(id, req.body);
+      if (!session) {
+        return res.status(404).json({ error: "Training session not found" });
+      }
+      res.json(session);
+    } catch (error) {
+      console.error("Error updating training session:", error);
+      res.status(500).json({ error: "Failed to update training session" });
+    }
+  });
+
+  // Reviews
+  app.get("/api/reviews/user/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const reviews = await storage.getReviewsByReviewedId(userId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+  });
+
+  app.post("/api/reviews", async (req, res) => {
+    try {
+      const { insertReviewSchema } = await import("@shared/schema");
+      const validatedData = insertReviewSchema.parse(req.body);
+      const review = await storage.createReview(validatedData);
+      res.json(review);
+    } catch (error) {
+      console.error("Error creating review:", error);
+      res.status(500).json({ error: "Failed to create review" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
