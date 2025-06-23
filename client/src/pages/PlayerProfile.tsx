@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import AvatarUpload from "@/components/AvatarUpload";
+import ReviewsList from "@/components/ReviewsList";
 import { ArrowLeft } from "lucide-react";
 import { formatMatchDate } from "@/lib/dateUtils";
 import { User } from "@shared/schema";
@@ -155,7 +156,11 @@ export default function PlayerProfile() {
         </div>
       )}
 
-
+      {/* Reviews Section */}
+      <div className="mb-8">
+        <h2 className="text-lg mb-4">Отзывы</h2>
+        <ReviewsList userId={player.id} />
+      </div>
     </div>
   );
 }

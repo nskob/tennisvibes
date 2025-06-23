@@ -15,6 +15,7 @@ import Profile from "@/pages/Profile";
 import Tournaments from "@/pages/Tournaments";
 import League from "@/pages/League";
 import Analytics from "@/pages/Analytics";
+import CreateTraining from "@/pages/CreateTraining";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +33,7 @@ function Router() {
         <Route path="/tournaments" component={Tournaments} />
         <Route path="/analytics" component={Analytics} />
         <Route path="/league" component={League} />
+        <Route path="/create-training" component={CreateTraining} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

@@ -3,7 +3,13 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { ArrowLeft, Minus, Plus, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Search, Trash2, Clock, User } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import AvatarUpload from "@/components/AvatarUpload";
 import { formatForDateInput, toISOString } from "@/lib/dateUtils";
 
@@ -11,6 +17,13 @@ interface MatchForm {
   opponentId: string;
   date: string;
   sets: Array<{ p1: number; p2: number }>;
+  notes: string;
+}
+
+interface TrainingForm {
+  trainerId: string;
+  date: string;
+  duration: number;
   notes: string;
 }
 

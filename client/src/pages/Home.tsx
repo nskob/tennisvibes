@@ -178,11 +178,64 @@ export default function Home() {
         )}
       </div>
 
-
-
-
-
-
+      {/* Recent Training Sessions */}
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+          <Clock className="w-4 h-4" />
+          Последние тренировки
+        </h2>
+        {trainingSessions && trainingSessions.length > 0 ? (
+          <div className="space-y-3">
+            {trainingSessions.slice(0, 3).map((session) => {
+              const trainer = Array.isArray(allUsers) ? allUsers.find((u: any) => u.id === session.trainerId) : null;
+              return (
+                <div key={session.id} className="flex items-center gap-2 py-2">
+                  {trainer && (
+                    <AvatarUpload user={trainer} size="sm" showUploadButton={false} />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">
+                      Тренировка с {trainer?.name || 'Unknown'}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <Calendar className="w-3 h-3" />
+                      <span>{formatMatchDate(session.date)}</span>
+                      <span>•</span>
+                      <Clock className="w-3 h-3" />
+                      <span>{session.duration} мин</span>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        session.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        session.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {session.status === 'completed' ? 'Завершена' :
+                         session.status === 'confirmed' ? 'Подтверждена' :
+                         'Ожидание'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center text-gray-400 py-4">
+            <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <div className="text-sm">Нет тренировок</div>
+          </div>
+        )}
+        
+        <div className="mt-4">
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => setLocation('/create-training')}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Запланировать тренировку
+          </Button>
+        </div>
+      </div>
 
       {/* Frequent Opponents */}
       <div className="mb-6 sm:mb-8">
