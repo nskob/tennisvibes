@@ -88,18 +88,17 @@ export default function Login() {
                    align-items: center;
                    justify-content: center;
                    width: 100%;
-                   background: white; 
-                   color: #374151; 
+                   background: transparent; 
+                   color: #6b7280; 
                    padding: 12px 24px; 
-                   border: 1px solid #d1d5db;
+                   border: none;
                    border-radius: 8px;
                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
                    font-size: 14px;
                    font-weight: 500;
                    cursor: pointer;
                    text-decoration: none;
-                   transition: all 0.2s;
-                   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
+                   transition: all 0.2s;">
             <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right: 8px; color: #0088cc;">
               <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.09-.65.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
             </svg>
@@ -111,12 +110,12 @@ export default function Login() {
         const button = telegramContainer.querySelector('button');
         if (button) {
           button.addEventListener('mouseenter', () => {
-            button.style.backgroundColor = '#f9fafb';
-            button.style.borderColor = '#9ca3af';
+            button.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+            button.style.color = '#374151';
           });
           button.addEventListener('mouseleave', () => {
-            button.style.backgroundColor = 'white';
-            button.style.borderColor = '#d1d5db';
+            button.style.backgroundColor = 'transparent';
+            button.style.color = '#6b7280';
           });
         }
       }, 1000);
@@ -146,7 +145,7 @@ export default function Login() {
               </p>
               <button 
                 onclick="window.telegramLogin()"
-                style="background: white; color: #374151; padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 14px; transition: all 0.2s;">
+                style="background: transparent; color: #6b7280; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 14px; transition: all 0.2s;">
                 Открыть бота снова
               </button>
             </div>
