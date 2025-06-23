@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import AvatarUpload from "@/components/AvatarUpload";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Award, Star, Phone, Mail, Clock, Users } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { formatMatchDate } from "@/lib/dateUtils";
 import { User } from "@shared/schema";
 
