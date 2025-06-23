@@ -115,10 +115,28 @@ A comprehensive tennis tracking application built as a full-stack web applicatio
 - **File Upload Limits**: 5MB file size restrictions
 - **Input Validation**: Zod schema validation for API inputs
 
+## Recent Changes
+
+### Match Confirmation System (June 23, 2025)
+- Implemented Telegram notification system for match confirmations
+- Added inline keyboard buttons for match approval/rejection in Telegram
+- Created match status tracking (pending, confirmed, rejected)
+- Only confirmed matches now count in user statistics and appear in match lists
+- All notifications for Maria Sokolova redirect to Nikita Skob's Telegram chat
+- Database persistence ensures match data survives server restarts
+
+### Technical Improvements
+- Switched from memory storage to PostgreSQL database with Drizzle ORM
+- Enhanced error handling for Telegram API "chat not found" scenarios
+- Implemented proper filtering for confirmed vs pending matches
+- Added comprehensive test data with 9 players and realistic match history
+
 ## Changelog
 
 ```
 Changelog:
+- June 23, 2025. Match confirmation system with Telegram notifications implemented
+- June 23, 2025. Database migration from memory to PostgreSQL completed
 - June 23, 2025. Initial setup
 ```
 
