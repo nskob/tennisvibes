@@ -15,9 +15,7 @@ export default function Players() {
     queryKey: ["/api/users"],
   });
 
-  const { data: coaches } = useQuery<User[]>({
-    queryKey: ["/api/coaches"],
-  });
+
 
   if (isLoading) {
     return (
