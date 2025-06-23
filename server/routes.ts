@@ -240,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allMatches = await storage.getAllMatches();
       
       // Sort by creation date descending (newest first)
-      allMatches.sort((a, b) => {
+      allMatches.sort((a: any, b: any) => {
         const dateA = new Date(a.createdAt || a.date).getTime();
         const dateB = new Date(b.createdAt || b.date).getTime();
         return dateB - dateA;
@@ -251,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Enrich with player names and status
       const enrichedMatches = await Promise.all(
-        paginatedMatches.map(async (match) => {
+        paginatedMatches.map(async (match: any) => {
           const player1 = await storage.getUser(match.player1Id);
           const player2 = await storage.getUser(match.player2Id);
           

@@ -49,7 +49,7 @@ export class TelegramBot {
   private lastUpdateId: number = 0;
   private pollingInterval: NodeJS.Timeout | null = null;
 
-  private async sendMessage(chatId: number, text: string, replyMarkup?: any) {
+  private async sendMessage(chatId: number | string, text: string, replyMarkup?: any) {
     const response = await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
       method: 'POST',
       headers: {
@@ -296,7 +296,7 @@ ${player1Name} vs ${player2Name}
         ]]
       };
 
-      await this.sendMessage(parseInt(recipientTelegramId), text, keyboard);
+      await this.sendMessage(recipientTelegramId, text, keyboard);
       console.log(`Match notification sent for match ${matchId} to user ${recipientTelegramId}`);
     } catch (error: any) {
       console.error('Error sending match notification:', error);
