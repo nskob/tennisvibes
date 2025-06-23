@@ -50,24 +50,32 @@ export class TelegramBot {
   private pollingInterval: NodeJS.Timeout | null = null;
 
   private async sendMessage(chatId: number | string, text: string, replyMarkup?: any) {
+    const requestBody = {
+      chat_id: chatId,
+      text,
+      reply_markup: replyMarkup,
+      parse_mode: 'HTML',
+    };
+    
+    console.log('Telegram API request:', JSON.stringify(requestBody, null, 2));
+    
     const response = await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        reply_markup: replyMarkup,
-        parse_mode: 'HTML',
-      }),
+      body: JSON.stringify(requestBody),
     });
 
+    const responseData = await response.json();
+    console.log('Telegram API response:', JSON.stringify(responseData, null, 2));
+
     if (!response.ok) {
-      throw new Error(`Telegram API error: ${response.statusText}`);
+      console.error('Telegram API error details:', responseData);
+      throw new Error(`Telegram API error: ${response.statusText} - ${JSON.stringify(responseData)}`);
     }
 
-    return response.json();
+    return responseData;
   }
 
   private async getUpdates() {
@@ -276,6 +284,8 @@ Username: @${userData.username || userData.telegramUsername}
 
   async sendMatchNotification(matchId: number, player1Name: string, player2Name: string, score: string, recipientTelegramId: string) {
     try {
+      console.log(`Attempting to send match notification to Telegram ID: ${recipientTelegramId}`);
+      
       const text = `🎾 Новый матч добавлен!
 
 ${player1Name} vs ${player2Name}
@@ -296,10 +306,15 @@ ${player1Name} vs ${player2Name}
         ]]
       };
 
-      await this.sendMessage(recipientTelegramId, text, keyboard);
+      // Convert string to number if needed
+      const chatId = parseInt(recipientTelegramId);
+      console.log(`Parsed chat ID: ${chatId}`);
+      
+      await this.sendMessage(chatId, text, keyboard);
       console.log(`Match notification sent for match ${matchId} to user ${recipientTelegramId}`);
     } catch (error: any) {
-      console.error('Error sending match notification:', error);
+      console.error('Error sending match notification:', error.message);
+      console.error('Full error:', error);
     }
   }
 
