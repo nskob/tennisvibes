@@ -552,9 +552,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint to create pending auth
+  app.post("/api/test-auth", async (req, res) => {
+    const { telegramId, firstName, lastName, username } = req.body;
+    
+    // Create test pending auth
+    (global as any).pendingTelegramAuth = (global as any).pendingTelegramAuth || {};
+    (global as any).pendingTelegramAuth[telegramId] = {
+      authData: {
+        id: telegramId,
+        first_name: firstName,
+        last_name: lastName,
+        username: username,
+        photo_url: '',
+        auth_date: Math.floor(Date.now() / 1000).toString(),
+        hash: 'test_hash'
+      },
+      timestamp: Date.now()
+    };
+    
+    res.json({ success: true, message: 'Test auth created' });
+  });
+
   // Get the latest Telegram user (for authentication polling)
   app.get("/api/auth/telegram/latest", async (req, res) => {
     try {
+      // First check for pending Telegram authentications
+      const pendingAuths = (global as any).pendingTelegramAuth || {};
+      
+      for (const telegramId in pendingAuths) {
+        const pendingAuth = pendingAuths[telegramId];
+        
+        // Check if auth is still valid (within 5 minutes)
+        if (Date.now() - pendingAuth.timestamp < 300000) {
+          // Process the pending authentication by creating/updating user
+          const authData = pendingAuth.authData;
+          
+          // Check if user already exists
+          let user = await storage.getUserByTelegramId(authData.id);
+          
+          if (!user) {
+            // Create new user from Telegram data
+            const newUserData = {
+              name: `${authData.first_name || ''} ${authData.last_name || ''}`.trim() || authData.username || `User${authData.id}`,
+              username: authData.username || `tg_${authData.id}`,
+              password: null,
+              avatarUrl: authData.photo_url || null,
+              telegramId: authData.id,
+              telegramUsername: authData.username,
+              telegramFirstName: authData.first_name,
+              telegramLastName: authData.last_name,
+              telegramPhotoUrl: authData.photo_url,
+              authProvider: "telegram" as const,
+              skillLevel: "3.0",
+              wins: 0,
+              losses: 0,
+              matchesPlayed: 0,
+              tournamentsPlayed: 0,
+              serveProgress: 0,
+              backhandProgress: 0,
+              enduranceProgress: 0,
+              achievements: [],
+              isCoach: false,
+            };
+            
+            user = await storage.createUser(newUserData);
+          }
+          
+          // Clear the pending auth
+          delete pendingAuths[telegramId];
+          
+          return res.json({
+            success: true,
+            user: {
+              id: user.id,
+              name: user.name,
+              username: user.username,
+              avatarUrl: user.avatarUrl,
+              authProvider: user.authProvider,
+            }
+          });
+        }
+      }
+      
+      // Fallback: check existing Telegram users
       const users = await storage.getAllUsers();
       const telegramUsers = users.filter((user: any) => 
         user.authProvider === 'telegram' || user.telegramId
@@ -574,6 +655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ success: false });
       }
     } catch (error) {
+      console.error('Error in telegram/latest:', error);
       res.status(500).json({ success: false, error: 'Failed to get latest user' });
     }
   });
