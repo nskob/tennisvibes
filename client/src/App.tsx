@@ -11,12 +11,10 @@ import MatchRecord from "@/pages/MatchRecord";
 import MatchDetail from "@/pages/MatchDetail";
 import Players from "@/pages/Players";
 import PlayerProfile from "@/pages/PlayerProfile";
-import Training from "@/pages/Training";
 import Profile from "@/pages/Profile";
 import Tournaments from "@/pages/Tournaments";
 import League from "@/pages/League";
 import Analytics from "@/pages/Analytics";
-import Coaches from "@/pages/Coaches";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -30,12 +28,10 @@ function Router() {
         <Route path="/match/:id" component={MatchDetail} />
         <Route path="/players" component={Players} />
         <Route path="/player/:id" component={PlayerProfile} />
-        <Route path="/training-checkin" component={Training} />
         <Route path="/profile" component={Profile} />
         <Route path="/tournaments" component={Tournaments} />
         <Route path="/analytics" component={Analytics} />
         <Route path="/league" component={League} />
-        <Route path="/coaches" component={Coaches} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

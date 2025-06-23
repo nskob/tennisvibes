@@ -44,17 +44,8 @@ export default function Home() {
     enabled: !!currentUserId,
   });
 
-  const { data: training, isLoading: trainingLoading } = useQuery({
-    queryKey: [`/api/training/user/${currentUserId}`],
-    enabled: !!currentUserId,
-  });
-
   const { data: allUsers } = useQuery({
     queryKey: ["/api/users"],
-  });
-
-  const { data: coaches = [] } = useQuery<User[]>({
-    queryKey: ["/api/coaches"],
   });
 
   if (isLoading || !currentUserId) {
@@ -81,7 +72,7 @@ export default function Home() {
 
 
   const recentMatches = Array.isArray(matches) ? matches.slice(0, 3) : [];
-  const recentTraining = Array.isArray(training) ? training.slice(0, 3) : [];
+
 
   // Calculate statistics from actual matches data
   const allMatches = Array.isArray(matches) ? matches : [];
@@ -184,79 +175,7 @@ export default function Home() {
 
 
 
-      {/* Recent Training */}
-      <div className="mb-6 sm:mb-8">
-        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Последние тренировки</h2>
-        {trainingLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="animate-pulse">
-                <div className="h-4 bg-app-secondary rounded"></div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {recentTraining.map((session: any) => {
-              const coach = coaches.find(c => c.name === session.coach);
-              return (
-                <div key={session.id} className="flex items-center space-x-3 py-2">
-                  {coach ? (
-                    <>
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage 
-                          src={coach.avatarUrl || undefined} 
-                          alt={coach.name}
-                        />
-                        <AvatarFallback className="text-xs">
-                          {coach.name.split(' ').map((n: string) => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <span 
-                            className="cursor-pointer hover:underline text-sm font-medium"
-                            style={{ color: '#2563eb' }}
-                            onClick={() => setLocation('/coaches')}
-                          >
-                            {coach.name}
-                          </span>
-                          <span className="text-gray-400 text-xs">·</span>
-                          <span className="text-gray-400 text-xs">{formatMatchDate(session.createdAt || session.date)}</span>
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {session.type} • {session.duration} мин
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback className="text-xs">
-                          СТ
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm">Самостоятельная тренировка</span>
-                          <span className="text-gray-400 text-xs">·</span>
-                          <span className="text-gray-400 text-xs">{formatMatchDate(session.createdAt || session.date)}</span>
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {session.type} • {session.duration} мин
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-            {recentTraining.length === 0 && (
-              <div className="text-gray-400 text-sm">Нет записей о тренировках</div>
-            )}
-          </div>
-        )}
-      </div>
+
 
       {/* Frequent Opponents */}
       <div className="mb-6 sm:mb-8">
